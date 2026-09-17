@@ -1,169 +1,151 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { IndianRupee, ShoppingCart, TrendingUp, Users, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { IndianRupee, ShoppingCart, TrendingUp, Users } from "lucide-react";
+
+// NOTE: All analytics data below is DEMO static data — not live DynamoDB figures.
+const demoSalesData = [
+  { name: 'Mon', revenue: 4000, orders: 24 },
+  { name: 'Tue', revenue: 3000, orders: 13 },
+  { name: 'Wed', revenue: 2000, orders: 98 },
+  { name: 'Thu', revenue: 2780, orders: 39 },
+  { name: 'Fri', revenue: 1890, orders: 48 },
+  { name: 'Sat', revenue: 2390, orders: 38 },
+  { name: 'Sun', revenue: 3490, orders: 43 },
+];
+
+const demoProductData = [
+  { name: 'Basmati Rice', sales: 400 },
+  { name: 'Cooking Oil', sales: 300 },
+  { name: 'Sugar', sales: 300 },
+  { name: 'Atta', sales: 200 },
+  { name: 'Tea', sales: 278 },
+];
 
 export default function AnalyticsPage() {
-  const salesData = [
-    { name: 'Mon', revenue: 4000, orders: 24 },
-    { name: 'Tue', revenue: 3000, orders: 13 },
-    { name: 'Wed', revenue: 2000, orders: 98 },
-    { name: 'Thu', revenue: 2780, orders: 39 },
-    { name: 'Fri', revenue: 1890, orders: 48 },
-    { name: 'Sat', revenue: 2390, orders: 38 },
-    { name: 'Sun', revenue: 3490, orders: 43 },
-  ];
-
-  const productData = [
-    { name: 'Basmati Rice', sales: 400 },
-    { name: 'Cooking Oil', sales: 300 },
-    { name: 'Sugar', sales: 300 },
-    { name: 'Atta', sales: 200 },
-    { name: 'Tea', sales: 278 },
+  const kpis = [
+    { label: "Total Sales", icon: IndianRupee, value: "₹19,550" },
+    { label: "Total Orders", icon: ShoppingCart, value: "303" },
+    { label: "Avg Order", icon: TrendingUp, value: "₹64.50" },
+    { label: "Customers", icon: Users, value: "142" },
   ];
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col gap-6 max-w-7xl mx-auto overflow-y-auto pr-2 pb-6">
-      <div className="flex justify-between items-end">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold tracking-tight">Analytics Workspace</h2>
-          <p className="text-text-muted font-medium">Business intelligence and operational trends</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <select className="bg-card/60 backdrop-blur-md border border-border-color shadow-subtle rounded-xl px-4 py-2 text-sm font-bold text-text-secondary focus:outline-none focus:ring-2 focus:ring-wa-green/30">
-            <option>Last 7 Days</option>
-            <option>Last 30 Days</option>
-            <option>This Month</option>
-          </select>
+    <div className="space-y-6">
+      <div>
+        <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--wbos-muted)' }}>Intelligence</div>
+        <div className="flex items-end justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--wbos-ink)' }}>Analytics</h1>
+            <p className="text-sm font-medium mt-1" style={{ color: 'var(--wbos-muted)' }}>
+              Business intelligence &amp; operational trends
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold px-2 py-1 rounded-md"
+              style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
+              DEMO DATA — Not live AWS metrics
+            </span>
+            <select className="rounded-md border px-3 py-1.5 text-sm font-medium outline-none"
+              style={{ 
+                background: 'var(--wbos-surface)', 
+                borderColor: 'var(--wbos-border)',
+                color: 'var(--wbos-ink-soft)'
+              }}>
+              <option>Last 7 Days</option>
+              <option>Last 30 Days</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* KPI Summary */}
+      {/* KPI Strip */}
       <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
-          <CardContent className="p-5">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2 text-text-muted">
-                <IndianRupee className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Total Sales</span>
-              </div>
-              <span className="text-xs font-bold text-wa-green flex items-center bg-wa-green/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="h-3 w-3" /> 14%</span>
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className="rounded-xl border p-5"
+            style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
+            <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--wbos-muted)' }}>
+              <kpi.icon className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">{kpi.label}</span>
             </div>
-            <div className="text-2xl font-bold">₹19,550</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
-          <CardContent className="p-5">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2 text-text-muted">
-                <ShoppingCart className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Total Orders</span>
-              </div>
-              <span className="text-xs font-bold text-wa-green flex items-center bg-wa-green/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="h-3 w-3" /> 8%</span>
-            </div>
-            <div className="text-2xl font-bold">303</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
-          <CardContent className="p-5">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2 text-text-muted">
-                <TrendingUp className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Average Order</span>
-              </div>
-              <span className="text-xs font-bold text-accent-red flex items-center bg-accent-red/10 px-1.5 py-0.5 rounded"><ArrowDownRight className="h-3 w-3" /> 2%</span>
-            </div>
-            <div className="text-2xl font-bold">₹64.50</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
-          <CardContent className="p-5">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2 text-text-muted">
-                <Users className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Active Customers</span>
-              </div>
-              <span className="text-xs font-bold text-wa-green flex items-center bg-wa-green/10 px-1.5 py-0.5 rounded"><ArrowUpRight className="h-3 w-3" /> 12%</span>
-            </div>
-            <div className="text-2xl font-bold">142</div>
-          </CardContent>
-        </Card>
+            <div className="text-2xl font-extrabold" style={{ color: 'var(--wbos-ink)' }}>{kpi.value}</div>
+          </div>
+        ))}
       </div>
 
-      {/* Charts Area */}
-      <div className="grid grid-cols-2 gap-6">
-        
-        {/* Revenue Trend */}
-        <Card className="bg-card/60 backdrop-blur-md border-border-color shadow-card col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold">Revenue & Order Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={salesData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis yAxisId="left" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
-                  <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    itemStyle={{ fontWeight: 'bold' }}
-                  />
-                  <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#00a884" strokeWidth={3} dot={{ r: 4, fill: '#00a884', strokeWidth: 0 }} activeDot={{ r: 6 }} name="Revenue (₹)" />
-                  <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 0 }} name="Orders" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Revenue + Orders chart */}
+      <div className="rounded-xl border overflow-hidden"
+        style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
+        <div className="px-5 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: 'var(--wbos-border)', background: 'var(--wbos-bg)' }}>
+          <h2 className="text-sm font-bold" style={{ color: 'var(--wbos-ink)' }}>Revenue &amp; Order Trend</h2>
+          <div className="flex items-center gap-4 text-xs">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 inline-block rounded" style={{ background: 'var(--success)' }}></span>Revenue</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 inline-block rounded" style={{ background: 'var(--ai)' }}></span>Orders</span>
+          </div>
+        </div>
+        <div className="p-5">
+          <div className="h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={demoSalesData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E4E7EC" vertical={false} />
+                <XAxis dataKey="name" stroke="#98A2B3" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis yAxisId="left" stroke="#98A2B3" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v => `₹${v}`} />
+                <YAxis yAxisId="right" orientation="right" stroke="#98A2B3" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E4E7EC', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', fontSize: '12px' }} />
+                <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#00A884" strokeWidth={2.5} dot={false} name="Revenue (₹)" />
+                <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#6366F1" strokeWidth={2.5} dot={false} name="Orders" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
-        {/* Top Products */}
-        <Card className="bg-card/60 backdrop-blur-md border-border-color shadow-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold">Top Products by Volume</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[250px] w-full mt-4">
+      {/* Product chart + Insights */}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="rounded-xl border overflow-hidden"
+          style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="px-5 py-4 border-b"
+            style={{ borderColor: 'var(--wbos-border)', background: 'var(--wbos-bg)' }}>
+            <h2 className="text-sm font-bold" style={{ color: 'var(--wbos-ink)' }}>Top Products by Volume</h2>
+          </div>
+          <div className="p-5">
+            <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={productData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                  <XAxis type="number" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke="#475569" fontSize={12} fontWeight={600} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    cursor={{fill: 'rgba(0,0,0,0.02)'}}
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  />
-                  <Bar dataKey="sales" fill="#06b6d4" radius={[0, 4, 4, 0]} barSize={24} name="Units Sold" />
+                <BarChart data={demoProductData} layout="vertical" margin={{ top: 0, right: 10, left: 30, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E4E7EC" horizontal={false} />
+                  <XAxis type="number" stroke="#98A2B3" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke="#667085" fontSize={11} fontWeight={500} tickLine={false} axisLine={false} />
+                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} contentStyle={{ borderRadius: '8px', border: '1px solid #E4E7EC', fontSize: '12px' }} />
+                  <Bar dataKey="sales" fill="#0891B2" radius={[0, 4, 4, 0]} barSize={16} name="Units Sold" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Customer Activity / Operational Trends (Placeholder lists) */}
-        <Card className="bg-card/60 backdrop-blur-md border-border-color shadow-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold">Operational Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 mt-2">
-              <div className="p-4 rounded-xl bg-accent-amber/10 border border-accent-amber/20 flex items-start gap-3">
-                <div className="mt-0.5 bg-accent-amber text-white rounded-full p-1"><TrendingUp className="h-3 w-3" /></div>
-                <div>
-                  <div className="font-bold text-sm text-accent-amber mb-0.5">Peak ordering time detected</div>
-                  <div className="text-xs font-medium text-text-secondary">Orders have spiked by 35% between 10 AM and 11 AM over the last 3 days.</div>
-                </div>
-              </div>
-              
-              <div className="p-4 rounded-xl bg-wa-green/10 border border-wa-green/20 flex items-start gap-3">
-                <div className="mt-0.5 bg-wa-green text-white rounded-full p-1"><Users className="h-3 w-3" /></div>
-                <div>
-                  <div className="font-bold text-sm text-wa-green mb-0.5">High customer retention</div>
-                  <div className="text-xs font-medium text-text-secondary">62% of customers this week were repeat buyers, up from 55% last week.</div>
-                </div>
-              </div>
+        <div className="rounded-xl border overflow-hidden"
+          style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="px-5 py-4 border-b"
+            style={{ borderColor: 'var(--wbos-border)', background: 'var(--wbos-bg)' }}>
+            <h2 className="text-sm font-bold" style={{ color: 'var(--wbos-ink)' }}>Operational Insights</h2>
+          </div>
+          <div className="p-5 space-y-3">
+            <div className="p-4 rounded-lg"
+              style={{ background: 'var(--warning-soft)', border: '1px solid var(--warning)' }}>
+              <div className="text-sm font-bold mb-1" style={{ color: 'var(--warning)' }}>Peak ordering time detected</div>
+              <div className="text-xs" style={{ color: 'var(--wbos-ink-soft)' }}>Orders spike 35% between 10–11 AM over last 3 days.</div>
             </div>
-          </CardContent>
-        </Card>
-
+            <div className="p-4 rounded-lg"
+              style={{ background: 'var(--success-soft)', border: '1px solid var(--success)' }}>
+              <div className="text-sm font-bold mb-1" style={{ color: 'var(--success)' }}>High customer retention</div>
+              <div className="text-xs" style={{ color: 'var(--wbos-ink-soft)' }}>62% of customers this week were repeat buyers.</div>
+            </div>
+            <div className="text-[10px] font-bold uppercase" style={{ color: 'var(--wbos-muted)' }}>
+              Demo data — Insights are illustrative
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

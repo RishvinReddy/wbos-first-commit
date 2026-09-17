@@ -2,38 +2,39 @@
   /* =========================================================
      WBOS BRAND
      ========================================================= */
-
   --wbos-green: #00A884;
   --wbos-green-dark: #008F72;
-  --wbos-green-soft: #E8F7F3;
+  --wbos-green-soft: #E6F7F2;
+  --wbos-green-subtle: #F0FDF9;
 
   /* =========================================================
      INK / TYPOGRAPHY
      ========================================================= */
-
   --wbos-ink: #101828;
   --wbos-ink-soft: #344054;
   --wbos-muted: #667085;
+  --wbos-placeholder: #98A2B3;
 
   /* =========================================================
      BACKGROUNDS & SURFACES
      ========================================================= */
-
-  --wbos-bg: #F8FAFC;
+  --wbos-bg: #F7F9FC;
   --wbos-surface: #FFFFFF;
+  --wbos-surface-raised: #FAFAFA;
+  --wbos-ink-surface: #101828;
 
   /* =========================================================
      BORDERS
      ========================================================= */
-
   --wbos-border: #E4E7EC;
+  --wbos-border-strong: #C5CDD8;
 
   /* =========================================================
      SEMANTIC COLORS
      ========================================================= */
-
   --success: #00A884;
-  --success-soft: #E8F7F3;
+  --success-soft: #E6F7F2;
+  --success-subtle: #F0FDF9;
 
   --info: #3B82F6;
   --info-soft: #EFF6FF;
@@ -51,16 +52,22 @@
   --event-soft: #ECFEFF;
 
   /* =========================================================
-     RADII & SHADOWS
+     SHADOWS
      ========================================================= */
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-
   --shadow-subtle: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-card: 0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-elevated: 0 4px 16px rgba(16, 24, 40, 0.08);
 
-  /* WhatsApp Theme Colors (Legacy Support) */
+  /* =========================================================
+     RADII
+     ========================================================= */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* WhatsApp Legacy */
   --wa-bg: #efeae2;
   --wa-bubble-self: #d9fdd3;
 }

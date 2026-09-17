@@ -1,25 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Send, Terminal, Sparkles, AlertTriangle, ArrowRight } from "lucide-react";
+import { Send, Terminal, Sparkles, AlertTriangle, ArrowRight, Zap } from "lucide-react";
 
 export default function AssistantPage() {
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<any[]>([
     {
       role: "assistant",
-      content: "WBOS Intelligence is online. How can I help you manage operations today?",
+      content: "WBOS Intelligence is online. I have access to your live operational data. How can I help you manage your business today?",
       type: "text"
     }
   ]);
 
-  const mockQuery = (e: React.FormEvent) => {
+  const handleQuery = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    
+
     const userQuery = query;
-    setHistory([...history, { role: "user", content: userQuery, type: "text" }]);
+    setHistory(prev => [...prev, { role: "user", content: userQuery, type: "text" }]);
     setQuery("");
 
     setTimeout(() => {
@@ -27,92 +26,122 @@ export default function AssistantPage() {
       if (userQuery.toLowerCase().includes("stock") || userQuery.toLowerCase().includes("inventory")) {
         response = {
           role: "assistant",
-          content: "3 products require attention.",
+          content: "Checking live inventory data from DynamoDB…",
           type: "action",
           payload: [
-            { name: "Basmati Rice", units: 18, status: "Low" },
-            { name: "Sunflower Oil", units: 7, status: "Critical" },
-            { name: "Toor Dal", units: 12, status: "Low" }
+            { name: "Basmati Rice 1kg", units: 8, status: "Low" },
+            { name: "Cooking Oil 1L", units: 6, status: "Low" },
           ],
-          recommendation: "Review reorder quantities for critical items immediately."
+          note: "Note: This response uses the DEMO Deterministic Execution Adapter, not live Bedrock."
         };
       } else {
         response = {
           role: "assistant",
-          content: "Query understood. In WBOS 2.0 (UI-4), this will trigger a Bedrock agent execution path to analyze Live AWS DynamoDB operational data.",
-          type: "text"
+          content: "In DEMO mode, this uses the Deterministic Execution Adapter. In LIVE mode, this would trigger a Bedrock agent execution path to query your live AWS DynamoDB operational data.",
+          type: "text",
+          note: "Note: DEMO — Deterministic Execution Adapter active."
         };
       }
       setHistory(prev => [...prev, response]);
-    }, 600);
+    }, 500);
   };
 
-  const QuickAction = ({ text }: { text: string }) => (
-    <button 
-      onClick={() => setQuery(text)}
-      className="bg-card/40 backdrop-blur-md border border-white/60 hover:bg-white/60 text-xs font-bold px-3 py-2 rounded-lg transition-colors text-left"
-    >
-      {text}
-    </button>
-  );
+  const quickActions = [
+    "Which products are low in stock?",
+    "Show pending orders",
+    "How much did we sell today?",
+  ];
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col gap-6 max-w-5xl mx-auto">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-accent-indigo" />
-          Intelligence Assistant
-        </h2>
-        <p className="text-text-muted font-medium">Business command interface powered by AWS Bedrock</p>
+    <div className="space-y-4">
+      <div>
+        <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--wbos-muted)' }}>Intelligence</div>
+        <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-2" style={{ color: 'var(--wbos-ink)' }}>
+          <Sparkles className="h-6 w-6" style={{ color: 'var(--ai)' }} />
+          AI Assistant
+        </h1>
+        <p className="text-sm font-medium mt-1" style={{ color: 'var(--wbos-muted)' }}>
+          Business command interface · {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' ? 'DEMO — Deterministic Adapter' : 'AWS Bedrock'}
+        </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 -mt-2">
-        <QuickAction text="Which products are low in stock?" />
-        <QuickAction text="How much did we sell today?" />
-        <QuickAction text="Show pending orders" />
-        <QuickAction text="Which customer has the highest order value?" />
+      {/* Quick actions */}
+      <div className="flex gap-2 flex-wrap">
+        {quickActions.map((qa) => (
+          <button key={qa} onClick={() => setQuery(qa)}
+            className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:opacity-80"
+            style={{ 
+              background: 'var(--wbos-surface)', 
+              borderColor: 'var(--wbos-border)',
+              color: 'var(--wbos-ink-soft)'
+            }}>
+            {qa}
+          </button>
+        ))}
       </div>
 
-      <Card className="flex-1 flex flex-col bg-[#1e1e1e] border-border-color shadow-card overflow-hidden relative">
-        {/* Terminal Header */}
-        <div className="h-10 bg-[#2d2d2d] flex items-center px-4 border-b border-black/40 shadow-subtle z-10 gap-2">
-          <Terminal className="h-4 w-4 text-gray-400" />
-          <span className="text-xs font-bold text-gray-400 font-jetbrains">wbos-bedrock-cli</span>
+      {/* Terminal */}
+      <div className="rounded-xl overflow-hidden border flex flex-col"
+        style={{ 
+          background: '#1a1d23', 
+          borderColor: 'rgba(255,255,255,0.08)',
+          height: 'calc(100vh - 22rem)'
+        }}>
+        {/* Terminal header */}
+        <div className="h-10 flex items-center px-4 gap-2 border-b shrink-0"
+          style={{ background: '#13151a', borderColor: 'rgba(255,255,255,0.06)' }}>
+          <Terminal className="h-3.5 w-3.5" style={{ color: '#6b7280' }} />
+          <span className="text-xs font-mono font-semibold" style={{ color: '#6b7280' }}>wbos-assistant</span>
+          <div className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-md"
+            style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--ai)' }}>
+            {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' ? 'DEMO MODE' : 'BEDROCK'}
+          </div>
         </div>
 
-        {/* Chat History */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 z-10 font-jetbrains">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {history.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-xl px-4 py-3 shadow-subtle ${msg.role === 'user' ? 'bg-wa-green/20 border border-wa-green/30 text-white' : 'bg-[#2d2d2d] border border-white/10 text-gray-200'}`}>
-                {msg.role === 'user' ? (
-                  <div className="text-sm font-medium">{msg.content}</div>
-                ) : (
-                  <div>
-                    <div className="text-sm font-medium mb-2 text-wa-green flex items-center gap-2">
-                      <Sparkles className="h-3 w-3" /> WBOS
-                    </div>
-                    <div className="text-sm leading-relaxed mb-2">{msg.content}</div>
-                    
-                    {msg.type === 'action' && msg.payload && (
-                      <div className="mt-4 space-y-2">
-                        {msg.payload.map((item: any, idx: number) => (
-                          <div key={idx} className="flex items-center gap-3 bg-black/30 p-2 rounded border border-white/5">
-                            <AlertTriangle className={`h-4 w-4 ${item.status === 'Critical' ? 'text-accent-red' : 'text-accent-amber'}`} />
-                            <span className="font-bold">{item.name}</span>
-                            <span className="text-gray-400 ml-auto">— {item.units} units</span>
-                          </div>
-                        ))}
-                        {msg.recommendation && (
-                          <div className="mt-4 p-3 bg-accent-indigo/10 border border-accent-indigo/20 rounded text-accent-indigo text-xs font-bold flex items-center justify-between">
-                            <span>Recommended action: {msg.recommendation}</span>
-                            <button className="bg-accent-indigo text-white px-2 py-1 rounded flex items-center gap-1 hover:bg-indigo-500 transition-colors">
-                              Execute <ArrowRight className="h-3 w-3" />
-                            </button>
-                          </div>
-                        )}
+              <div className={`max-w-[80%] rounded-xl px-4 py-3 ${
+                msg.role === 'user' 
+                  ? 'rounded-tr-sm' 
+                  : 'rounded-tl-sm'
+              }`}
+                style={{ 
+                  background: msg.role === 'user' ? 'rgba(0,168,132,0.15)' : 'rgba(255,255,255,0.05)',
+                  border: msg.role === 'user' ? '1px solid rgba(0,168,132,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                }}>
+
+                {msg.role === 'assistant' && (
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Zap className="h-3 w-3" style={{ color: 'var(--wbos-green)' }} />
+                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--wbos-green)' }}>
+                      WBOS
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-sm font-mono leading-relaxed" style={{ color: msg.role === 'user' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.75)' }}>
+                  {msg.content}
+                </div>
+
+                {msg.type === 'action' && msg.payload && (
+                  <div className="mt-3 space-y-2">
+                    {msg.payload.map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0"
+                          style={{ color: item.status === 'Critical' ? 'var(--danger)' : 'var(--warning)' }} />
+                        <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.8)' }}>{item.name}</span>
+                        <span className="ml-auto text-xs font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>{item.units} units</span>
                       </div>
-                    )}
+                    ))}
+                  </div>
+                )}
+
+                {msg.note && (
+                  <div className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    {msg.note}
                   </div>
                 )}
               </div>
@@ -120,26 +149,26 @@ export default function AssistantPage() {
           ))}
         </div>
 
-        {/* Command Input */}
-        <div className="bg-[#2d2d2d] p-4 z-10 border-t border-black/40">
-          <form onSubmit={mockQuery} className="relative flex items-center">
-            <span className="absolute left-4 text-wa-green font-jetbrains font-bold">❯</span>
-            <input 
-              type="text" 
+        {/* Input */}
+        <div className="p-4 border-t shrink-0" style={{ background: '#13151a', borderColor: 'rgba(255,255,255,0.06)' }}>
+          <form onSubmit={handleQuery} className="relative flex items-center gap-3">
+            <span className="text-base font-bold shrink-0" style={{ color: 'var(--wbos-green)' }}>❯</span>
+            <input
+              type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Enter operational command..." 
-              className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg pl-10 pr-12 py-3 text-sm text-white focus:outline-none focus:border-wa-green/50 font-jetbrains transition-colors"
+              placeholder="Enter operational command…"
+              className="flex-1 bg-transparent text-sm outline-none font-mono"
+              style={{ color: 'rgba(255,255,255,0.8)', caretColor: 'var(--wbos-green)' }}
             />
-            <button 
-              type="submit"
-              className={`absolute right-2 p-2 rounded-md transition-colors ${query.trim() ? 'text-wa-green hover:bg-wa-green/10' : 'text-gray-500'}`}
-            >
+            <button type="submit" disabled={!query.trim()}
+              className="shrink-0 transition-opacity disabled:opacity-30"
+              style={{ color: 'var(--wbos-green)' }}>
               <Send className="h-4 w-4" />
             </button>
           </form>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

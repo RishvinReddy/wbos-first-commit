@@ -1,86 +1,129 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import './tokens.css';
-
 @import "tailwindcss";
 
 @theme {
   --font-outfit: 'Outfit', sans-serif;
   --font-jetbrains: 'JetBrains Mono', monospace;
 
-  /* Colors mapped to tokens.css */
+  /* Brand */
   --color-wbos-green: var(--wbos-green);
   --color-wbos-green-dark: var(--wbos-green-dark);
   --color-wbos-green-soft: var(--wbos-green-soft);
+  --color-wbos-green-subtle: var(--wbos-green-subtle);
 
+  /* Typography */
   --color-wbos-ink: var(--wbos-ink);
   --color-wbos-ink-soft: var(--wbos-ink-soft);
   --color-wbos-muted: var(--wbos-muted);
+  --color-wbos-placeholder: var(--wbos-placeholder);
 
+  /* Backgrounds */
   --color-wbos-bg: var(--wbos-bg);
   --color-wbos-surface: var(--wbos-surface);
-  --color-wbos-border: var(--wbos-border);
+  --color-wbos-surface-raised: var(--wbos-surface-raised);
+  --color-wbos-ink-surface: var(--wbos-ink-surface);
 
+  /* Borders */
+  --color-wbos-border: var(--wbos-border);
+  --color-wbos-border-strong: var(--wbos-border-strong);
+
+  /* Semantic */
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
-  
+  --color-success-subtle: var(--success-subtle);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
-  
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  
   --color-ai: var(--ai);
   --color-ai-soft: var(--ai-soft);
-  
   --color-event: var(--event);
   --color-event-soft: var(--event-soft);
 
+  /* WhatsApp */
   --color-wa-bg: var(--wa-bg);
   --color-wa-bubble-self: var(--wa-bubble-self);
 
-  /* Radii mapped to tokens.css */
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-
-  /* Shadows mapped to tokens.css */
+  /* Shadows */
   --shadow-subtle: var(--shadow-subtle);
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
 }
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     background: var(--wbos-bg);
     color: var(--wbos-ink);
     font-family: 'Outfit', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    position: relative;
-    padding-bottom: 20px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Scrollbars */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--wbos-muted);
-    border-radius: 10px;
-    border: 2px solid transparent;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--wbos-ink-soft);
-  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--wbos-border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--wbos-border-strong); }
 }
 
 @layer utilities {
-  .inventory-bar {
+  /* Stock bar utility */
+  .stock-bar { background: var(--wbos-border); }
+
+  /* Pulse dot */
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.3;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* Pipeline connector */
+  .pipeline-step {
+    position: relative;
+  }
+  .pipeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 2px;
     background: var(--wbos-border);
+  }
+
+  /* Fade-in animation */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.2s ease-out forwards; }
+
+  /* Dark card surface */
+  .wbos-dark-card {
+    background: var(--wbos-ink-surface);
+    color: white;
   }
 }

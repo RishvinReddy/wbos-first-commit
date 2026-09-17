@@ -11,115 +11,189 @@ import {
   Users, 
   Truck, 
   BarChart3, 
-  Bot 
+  Bot,
+  Search,
+  Zap
 } from "lucide-react";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "WBOS Command Center",
-  description: "Operations Dashboard",
+  title: "WBOS — Business Operations OS",
+  description: "Enterprise operations command center powered by AWS",
 };
+
+const navGroups = [
+  {
+    label: "Workspace",
+    items: [
+      { href: "/", icon: LayoutDashboard, label: "Overview" },
+    ]
+  },
+  {
+    label: "Customer",
+    items: [
+      { href: "/conversations", icon: MessageSquare, label: "Conversations" },
+      { href: "/customers", icon: Users, label: "Customers" },
+    ]
+  },
+  {
+    label: "Operations",
+    items: [
+      { href: "/orders", icon: ShoppingCart, label: "Orders" },
+      { href: "/inventory", icon: Package, label: "Inventory" },
+      { href: "/delivery", icon: Truck, label: "Delivery" },
+    ]
+  },
+  {
+    label: "Intelligence",
+    items: [
+      { href: "/analytics", icon: BarChart3, label: "Analytics" },
+      { href: "/assistant", icon: Bot, label: "AI Assistant" },
+    ]
+  },
+  {
+    label: "System",
+    items: [
+      { href: "/events", icon: Activity, label: "Events" },
+    ]
+  }
+];
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className={`${outfit.className} antialiased flex bg-wbos-bg text-wbos-ink`}>
-        {/* Subtle radial glow */}
-        <div className="absolute inset-0 z-0 pointer-events-none" style={{
-          background: 'radial-gradient(900px circle at 85% 5%, rgba(0, 168, 132, 0.035), transparent 60%)'
-        }}></div>
+  const isDemo = process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo';
 
-        {/* Sidebar Navigation */}
-        <nav className="w-64 border-r border-wbos-border bg-wbos-bg flex flex-col p-4 z-10 pb-8 h-screen overflow-y-auto">
-          <div className="mb-8 flex items-center gap-3 px-2">
-            <div className="h-8 w-8 rounded-lg bg-wbos-green flex items-center justify-center text-white font-bold text-lg shadow-sm">
+  return (
+    <html lang="en" className="h-full">
+      <body className={`${outfit.className} antialiased flex h-full overflow-hidden`} style={{ background: 'var(--wbos-bg)', color: 'var(--wbos-ink)' }}>
+
+        {/* ─── SIDEBAR ───────────────────────────────────── */}
+        <nav className="w-60 flex flex-col h-screen shrink-0 border-r"
+          style={{ 
+            background: 'var(--wbos-surface)', 
+            borderColor: 'var(--wbos-border)',
+            boxShadow: 'var(--shadow-subtle)'
+          }}>
+
+          {/* Logo */}
+          <div className="flex items-center gap-3 px-5 h-14 border-b shrink-0" style={{ borderColor: 'var(--wbos-border)' }}>
+            <div className="w-7 h-7 rounded-md flex items-center justify-center text-white font-bold text-sm shrink-0"
+              style={{ background: 'var(--wbos-green)' }}>
               W
             </div>
-            <div>
-              <h1 className="text-lg font-extrabold tracking-tight text-wbos-ink leading-tight">WBOS</h1>
-              <div className="text-[10px] font-semibold text-wbos-muted uppercase tracking-widest leading-tight">Command Center</div>
+            <div className="leading-tight">
+              <div className="font-extrabold text-sm tracking-tight" style={{ color: 'var(--wbos-ink)' }}>WBOS</div>
+              <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--wbos-muted)' }}>Business OS</div>
             </div>
           </div>
-          
-          <div className="space-y-1 flex-1">
-            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-4">Workspace</div>
-            <Link href="/" className="flex items-center gap-3 rounded-md px-3 py-2 bg-success-soft text-success font-semibold text-sm transition-all">
-              <LayoutDashboard className="h-4 w-4" /> Overview
-            </Link>
-            <Link href="/conversations" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <MessageSquare className="h-4 w-4 text-wbos-muted" /> Conversations
-            </Link>
-            <Link href="/customers" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <Users className="h-4 w-4 text-wbos-muted" /> Customers
-            </Link>
 
-            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-6">Operations</div>
-            <Link href="/orders" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <ShoppingCart className="h-4 w-4 text-wbos-muted" /> Orders
-            </Link>
-            <Link href="/inventory" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <Package className="h-4 w-4 text-wbos-muted" /> Inventory
-            </Link>
-            <Link href="/delivery" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <Truck className="h-4 w-4 text-wbos-muted" /> Delivery
-            </Link>
-
-            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-6">Intelligence</div>
-            <Link href="/analytics" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <BarChart3 className="h-4 w-4 text-wbos-muted" /> Analytics
-            </Link>
-            <Link href="/assistant" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <Bot className="h-4 w-4 text-wbos-muted" /> AI Assistant
-            </Link>
-
-            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-6">System</div>
-            <Link href="/events" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
-              <Activity className="h-4 w-4 text-wbos-muted" /> Events
+          {/* Command Entry */}
+          <div className="px-3 py-3 border-b shrink-0" style={{ borderColor: 'var(--wbos-border)' }}>
+            <Link href="/assistant"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm transition-colors group"
+              style={{ background: 'var(--wbos-bg)', border: '1px solid var(--wbos-border)' }}>
+              <Search className="h-3.5 w-3.5 shrink-0" style={{ color: 'var(--wbos-muted)' }} />
+              <span className="text-sm flex-1" style={{ color: 'var(--wbos-muted)' }}>Ask WBOS anything…</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded hidden lg:inline-block"
+                style={{ background: 'var(--wbos-border)', color: 'var(--wbos-muted)' }}>⌘K</span>
             </Link>
           </div>
-          
-          <div className="mt-auto border-t border-wbos-border pt-4 px-3 flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-wbos-ink-soft"></div>
-            <div>
-              <div className="text-xs font-bold text-wbos-ink">TENANT_001</div>
-              <div className="text-[11px] font-medium text-wbos-muted">Owner</div>
+
+          {/* Nav */}
+          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
+            {navGroups.map((group) => (
+              <div key={group.label}>
+                <div className="text-[10px] font-bold uppercase tracking-widest px-2 mb-1.5"
+                  style={{ color: 'var(--wbos-placeholder)' }}>
+                  {group.label}
+                </div>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <Link key={item.href} href={item.href}
+                      className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-all group hover:text-wbos-ink"
+                      style={{ color: 'var(--wbos-ink-soft)' }}>
+                      <item.icon className="h-4 w-4 shrink-0" style={{ color: 'var(--wbos-muted)' }} />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* User Footer */}
+          <div className="border-t px-4 py-3 shrink-0" style={{ borderColor: 'var(--wbos-border)' }}>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                style={{ background: 'var(--wbos-green)' }}>
+                O
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold leading-tight truncate" style={{ color: 'var(--wbos-ink)' }}>Owner</div>
+                <div className="text-[10px] leading-tight" style={{ color: 'var(--wbos-muted)' }}>TENANT_001</div>
+              </div>
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--success)' }}></div>
+              </div>
             </div>
           </div>
         </nav>
-        
-        {/* Main Content Area */}
-        <main className="flex-1 flex flex-col min-h-screen overflow-auto z-10 relative">
-          <header className="h-14 flex items-center px-6 border-b border-wbos-border bg-wbos-surface/80 backdrop-blur-md justify-between">
-            <div className="text-sm font-semibold text-wbos-ink-soft flex items-center gap-2">
-              <span>Overview</span>
+
+        {/* ─── MAIN ──────────────────────────────────────── */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+          {/* Top Bar */}
+          <header className="h-14 shrink-0 flex items-center justify-between px-6 border-b"
+            style={{ 
+              background: 'var(--wbos-surface)', 
+              borderColor: 'var(--wbos-border)',
+              boxShadow: 'var(--shadow-subtle)'
+            }}>
+
+            <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--wbos-muted)' }}>
+              <Zap className="h-3.5 w-3.5" style={{ color: 'var(--wbos-green)' }} />
+              <span className="font-semibold" style={{ color: 'var(--wbos-ink-soft)' }}>WBOS</span>
+              <span>/</span>
+              <span className="font-medium">Overview</span>
             </div>
-            
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-success"></span>
-                <span className="text-xs font-medium text-wbos-ink">AWS Connected</span>
+
+            <div className="flex items-center gap-4">
+              {/* AWS Status */}
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--success)' }}></div>
+                <span className="text-xs font-semibold" style={{ color: 'var(--wbos-ink-soft)' }}>AWS Connected</span>
               </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-wbos-muted px-2 py-0.5 bg-wbos-bg border border-wbos-border rounded-md">
-                  {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' ? 'DEMO' : 'LIVE'}
-                </span>
-                {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' && (
-                  <span className="text-xs text-wbos-muted hidden md:inline-block">Deterministic Execution Adapter</span>
-                )}
+
+              {/* Mode indicator */}
+              <div className="flex items-center gap-2 px-3 py-1 rounded-md border text-xs font-bold"
+                style={{ 
+                  background: isDemo ? 'var(--wbos-bg)' : 'var(--success-soft)',
+                  borderColor: isDemo ? 'var(--wbos-border)' : 'var(--success)',
+                  color: isDemo ? 'var(--wbos-muted)' : 'var(--success)'
+                }}>
+                {isDemo ? 'DEMO' : 'LIVE'}
+                {isDemo && <span className="font-normal hidden lg:inline" style={{ color: 'var(--wbos-placeholder)' }}>· Deterministic Adapter</span>}
+              </div>
+
+              {/* EventBridge Indicator */}
+              <div className="hidden md:flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--event)' }}></div>
+                <span className="text-xs font-semibold" style={{ color: 'var(--wbos-muted)' }}>EventBridge Active</span>
               </div>
             </div>
           </header>
-          
-          <div className="flex-1 p-8">
-            {children}
-          </div>
-        </main>
+
+          {/* Page Content */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="max-w-[1280px] mx-auto px-8 py-8">
+              {children}
+            </div>
+          </main>
+        </div>
       </body>
     </html>
   );
