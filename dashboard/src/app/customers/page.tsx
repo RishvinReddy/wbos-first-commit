@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Phone, MessageSquare, ShoppingCart, Clock, IndianRupee } from "lucide-react";
+import { Search, MapPin, Phone, MessageSquare, ShoppingCart, Clock, IndianRupee, Check } from "lucide-react";
+import Link from "next/link";
 
 export default function CustomersPage() {
   const customers = [
@@ -70,9 +71,9 @@ export default function CustomersPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="flex items-center gap-2 bg-white border border-border-color shadow-sm px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
+                  <Link href="/conversations" className="flex items-center gap-2 bg-white border border-border-color shadow-sm px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-wa-green transition-colors">
                     <MessageSquare className="h-4 w-4 text-wa-green" /> Message
-                  </button>
+                  </Link>
                   <button className="flex items-center gap-2 bg-text-primary text-white shadow-sm px-4 py-2 rounded-xl text-sm font-bold hover:bg-black transition-colors">
                     Edit Profile
                   </button>
@@ -92,11 +93,13 @@ export default function CustomersPage() {
               </CardContent>
             </Card>
             <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 text-text-muted mb-2">
-                  <ShoppingCart className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Total Orders</span>
-                </div>
-                <div className="text-2xl font-bold">{customers[0].orders}</div>
+              <CardContent className="p-5 hover:bg-white/40 transition-colors cursor-pointer group">
+                <Link href="/orders" className="block">
+                  <div className="flex items-center gap-2 text-text-muted mb-2 group-hover:text-accent-indigo transition-colors">
+                    <ShoppingCart className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Total Orders</span>
+                  </div>
+                  <div className="text-2xl font-bold group-hover:text-accent-indigo transition-colors">{customers[0].orders}</div>
+                </Link>
               </CardContent>
             </Card>
             <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
@@ -111,34 +114,43 @@ export default function CustomersPage() {
 
           {/* Current Order & History */}
           <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-bold">Recent Orders</CardTitle>
+              <Link href="/orders" className="text-xs font-bold text-accent-indigo hover:underline">View All Pipeline</Link>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-white border border-wa-green/30 shadow-badge">
+                <div className="p-4 rounded-xl bg-white border border-wa-green/30 shadow-badge hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">#1042</span>
-                        <Badge className="bg-accent-amber/10 text-accent-amber hover:bg-accent-amber/20 border-accent-amber/20">Preparing</Badge>
+                        <Link href="/orders" className="font-bold text-lg hover:text-wa-green transition-colors">#1042</Link>
+                        <Badge className="bg-accent-amber/10 text-accent-amber hover:bg-accent-amber/20 border-accent-amber/20 cursor-pointer">Preparing</Badge>
                       </div>
                       <div className="text-sm font-medium text-text-muted mt-1">Today, 10:45 AM</div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-lg">₹540</div>
-                      <div className="text-sm font-medium text-wa-green">Paid via UPI</div>
+                      <div className="text-sm font-medium text-wa-green flex items-center justify-end gap-1"><Check className="h-3 w-3" /> Paid via UPI</div>
                     </div>
                   </div>
                   <div className="pt-3 border-t border-dashed border-black/10">
                     <ul className="text-sm font-medium text-text-secondary space-y-1">
-                      <li>• 2kg Basmati Rice</li>
-                      <li>• 1L Cooking Oil</li>
+                      <li>
+                        <Link href="/inventory" className="hover:text-accent-indigo transition-colors flex items-center gap-1.5 group">
+                           • 2kg <span className="group-hover:underline">Basmati Rice</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/inventory" className="hover:text-accent-indigo transition-colors flex items-center gap-1.5 group">
+                           • 1L <span className="group-hover:underline">Cooking Oil</span>
+                        </Link>
+                      </li>
                     </ul>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white/40 border border-border-color">
+                <div className="p-4 rounded-xl bg-white/40 border border-border-color hover:bg-white transition-colors">
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="flex items-center gap-2">

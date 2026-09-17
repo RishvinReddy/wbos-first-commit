@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package, AlertTriangle, ArrowRight, Zap, RefreshCw, BarChart2, Filter } from "lucide-react";
+import Link from "next/link";
 
 export default function InventoryPage() {
   const inventory = [
@@ -59,26 +60,30 @@ export default function InventoryPage() {
           </CardContent>
         </Card>
         <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-card">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <div className="text-xs font-bold uppercase text-text-muted mb-1">AI Reorders</div>
-              <div className="text-2xl font-bold text-accent-indigo">3</div>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-accent-indigo/10 text-accent-indigo flex items-center justify-center">
-              <Zap className="h-5 w-5" />
-            </div>
-          </CardContent>
+          <Link href="/events" className="block h-full cursor-pointer group">
+            <CardContent className="p-5 flex items-center justify-between h-full hover:bg-white/40 transition-colors">
+              <div>
+                <div className="text-xs font-bold uppercase text-text-muted mb-1 group-hover:text-accent-indigo transition-colors">AI Reorders</div>
+                <div className="text-2xl font-bold text-accent-indigo group-hover:scale-105 transition-transform origin-left">3</div>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-accent-indigo/10 text-accent-indigo flex items-center justify-center group-hover:bg-accent-indigo group-hover:text-white transition-colors">
+                <Zap className="h-5 w-5" />
+              </div>
+            </CardContent>
+          </Link>
         </Card>
         <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-card">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <div className="text-xs font-bold uppercase text-text-muted mb-1">Turnover Rate</div>
-              <div className="text-2xl font-bold text-accent-cyan">High</div>
-            </div>
-            <div className="h-10 w-10 rounded-full bg-accent-cyan/10 text-accent-cyan flex items-center justify-center">
-              <RefreshCw className="h-5 w-5" />
-            </div>
-          </CardContent>
+          <Link href="/orders" className="block h-full cursor-pointer group">
+            <CardContent className="p-5 flex items-center justify-between h-full hover:bg-white/40 transition-colors">
+              <div>
+                <div className="text-xs font-bold uppercase text-text-muted mb-1 group-hover:text-accent-cyan transition-colors">Turnover Rate</div>
+                <div className="text-2xl font-bold text-accent-cyan group-hover:scale-105 transition-transform origin-left">High</div>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-accent-cyan/10 text-accent-cyan flex items-center justify-center group-hover:bg-accent-cyan group-hover:text-white transition-colors">
+                <RefreshCw className="h-5 w-5" />
+              </div>
+            </CardContent>
+          </Link>
         </Card>
       </div>
 
@@ -128,9 +133,9 @@ export default function InventoryPage() {
                   </div>
                   
                   <div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-text-secondary">
+                    <Link href="/orders" className="flex items-center gap-1.5 text-xs font-bold text-text-secondary hover:text-wa-green transition-colors w-fit">
                       <BarChart2 className="h-4 w-4 text-text-muted" /> {item.velocity}
-                    </div>
+                    </Link>
                   </div>
                   
                   <div className="text-right">

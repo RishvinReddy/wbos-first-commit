@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, CheckCircle, AlertTriangle, Truck, MapPin, Phone, User, Check, Clock } from "lucide-react";
+import { ShoppingCart, CheckCircle, AlertTriangle, Truck, MapPin, Phone, User, Check, Clock, Box, Activity } from "lucide-react";
+import Link from "next/link";
 
 export default function OrdersPage() {
   const pipeline = {
@@ -26,17 +27,26 @@ export default function OrdersPage() {
         <div className="font-bold text-sm group-hover:text-wa-green transition-colors">{order.id}</div>
         <div className="text-[10px] text-text-muted font-bold flex items-center gap-1"><Clock className="h-3 w-3" /> {order.time}</div>
       </div>
-      <div className="text-sm font-bold text-text-primary mb-1 flex items-center gap-1.5">
+      
+      <Link href="/customers" className="text-sm font-bold text-text-primary mb-1 flex items-center gap-1.5 hover:text-wa-green transition-colors w-fit">
         <User className="h-3 w-3 text-text-muted" /> {order.customer}
-      </div>
-      <div className="text-xs text-text-secondary font-medium mb-3 pb-3 border-b border-dashed border-black/5">
+      </Link>
+      
+      <Link href="/inventory" className="text-xs text-text-secondary font-medium mb-3 pb-3 border-b border-dashed border-black/5 flex items-start gap-1.5 hover:text-accent-indigo transition-colors">
+        <Box className="h-3 w-3 text-text-muted mt-0.5 shrink-0" />
         {order.items}
-      </div>
+      </Link>
+      
       <div className="flex justify-between items-center">
         <div className="font-bold text-sm">₹{order.total}</div>
-        <button className="bg-text-primary hover:bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md transition-colors">
-          View Details
-        </button>
+        <div className="flex items-center gap-2">
+          <Link href="/events" className="text-text-muted hover:text-accent-cyan p-1 transition-colors">
+            <Activity className="h-4 w-4" />
+          </Link>
+          <button className="bg-text-primary hover:bg-black text-white text-[10px] font-bold px-2 py-1 rounded-md transition-colors">
+            View Details
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -101,13 +111,13 @@ export default function OrdersPage() {
 
         {/* DELIVERY */}
         <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-sm">
-          <div className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl">
+          <Link href="/delivery" className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl hover:bg-white/50 transition-colors">
             <div className="font-bold text-sm flex items-center gap-2">
               <Truck className="h-4 w-4 text-wa-green" />
               Delivery
             </div>
             <span className="bg-wa-green/10 text-wa-green text-xs font-bold px-2 py-0.5 rounded-full">{pipeline.delivery.length}</span>
-          </div>
+          </Link>
           <div className="flex-1 p-3 overflow-y-auto">
             {pipeline.delivery.map(order => <OrderCard key={order.id} order={order} status="delivery" />)}
           </div>
