@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, CheckCircle, PackageWarning, Truck, MapPin, Phone, User, Check, Clock } from "lucide-react";
+import { ShoppingCart, CheckCircle, AlertTriangle, Truck, MapPin, Phone, User, Check, Clock } from "lucide-react";
 
 export default function OrdersPage() {
   const pipeline = {
@@ -89,7 +89,7 @@ export default function OrdersPage() {
         <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-sm">
           <div className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl">
             <div className="font-bold text-sm flex items-center gap-2">
-              <PackageWarning className="h-4 w-4 text-accent-amber" />
+              <AlertTriangle className="h-4 w-4 text-accent-amber" />
               Preparing
             </div>
             <span className="bg-accent-amber/10 text-accent-amber text-xs font-bold px-2 py-0.5 rounded-full">{pipeline.preparing.length}</span>

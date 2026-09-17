@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, PackageWarning, ArrowRight, Zap, RefreshCw, BarChart2, Filter } from "lucide-react";
+import { Search, Package, AlertTriangle, ArrowRight, Zap, RefreshCw, BarChart2, Filter } from "lucide-react";
 
 export default function InventoryPage() {
   const inventory = [
@@ -54,7 +54,7 @@ export default function InventoryPage() {
               <div className="text-2xl font-bold text-accent-red">14</div>
             </div>
             <div className="h-10 w-10 rounded-full bg-accent-red/10 text-accent-red flex items-center justify-center">
-              <PackageWarning className="h-5 w-5" />
+              <AlertTriangle className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>

@@ -6,7 +6,7 @@ import {
   TrendingUp, 
   Truck,
   Activity,
-  PackageWarning,
+  AlertTriangle,
   Clock,
   ArrowRight
 } from "lucide-react";
@@ -118,7 +118,7 @@ export default function ExecutiveCockpit() {
                        'bg-wa-green/10 text-wa-green'
                      }`}>
                        {order.status === 'New' ? <ShoppingCart className="h-4 w-4" /> :
-                        order.status === 'Preparing' ? <PackageWarning className="h-4 w-4" /> :
+                        order.status === 'Preparing' ? <AlertTriangle className="h-4 w-4" /> :
                         order.status === 'Delivery' ? <Truck className="h-4 w-4" /> :
                         <Activity className="h-4 w-4" />}
                      </div>
@@ -179,7 +179,7 @@ export default function ExecutiveCockpit() {
             <CardTitle className="text-lg font-bold flex items-center justify-between">
               Inventory Intelligence
               <span className="text-xs font-bold text-accent-red flex items-center gap-1 bg-accent-red/10 px-2 py-1 rounded-md">
-                <PackageWarning className="h-3 w-3" /> 2 Low Stock
+                <AlertTriangle className="h-3 w-3" /> 2 Low Stock
               </span>
             </CardTitle>
           </CardHeader>
