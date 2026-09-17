@@ -80,7 +80,7 @@ When Bedrock selects a tool to use (e.g., `get_daily_sales`), the request must p
 Owners can ask complex analytical questions directly in WhatsApp. Bedrock selects appropriate BI tools (like `get_sales_summary` or `get_low_stock_products`), and the system retrieves the live, tenant-scoped data from DynamoDB to construct the answer.
 
 ## Event-Driven Automation
-When an order is placed, an `OrderCreated` event is emitted to EventBridge. This triggers the Invoice Lambda (to generate an S3 PDF) and Notification Lambda in parallel, removing synchronous blocking from the user's conversational flow.
+When an order is placed, an `OrderCreated` event is emitted to EventBridge. This triggers the Invoice Lambda (to generate an S3 PDF) and a WhatsApp notification integration point (simulated notification for the MVP) in parallel, removing synchronous blocking from the user's conversational flow.
 
 ## Command Center
 A modern Next.js (App Router) + Tailwind CSS + shadcn/ui dashboard that provides owners with a visual operational layer. It consumes the exact same DynamoDB state and EventBridge feed as the WhatsApp bot.

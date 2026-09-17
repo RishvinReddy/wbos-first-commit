@@ -23,7 +23,7 @@
 > "But this isn't just a chatbot. That order emitted an `OrderCreated` event to Amazon EventBridge."
 *Action: Switch to the S3 Bucket / generated PDF.*
 **Speaker:**
-> "EventBridge immediately triggered an Invoice Lambda that generated a PDF receipt in S3, and a Notification Lambda that alerted the store. All asynchronously, with zero blocking on the conversational flow."
+> "EventBridge immediately triggered an Invoice Lambda that generated a PDF receipt in S3, and simultaneously triggered our notification integration point—which acts as a simulated notification for the MVP—to alert the store. All asynchronously, with zero blocking on the conversational flow."
 
 ### 1:15–1:45 — Owner Conversational BI
 *Action: Open the WhatsApp Owner chat (using the Owner's verified phone number).*
