@@ -64,6 +64,19 @@ flowchart LR
     DashboardAPI --> DB
 ```
 
+## Execution Modes
+
+### Live Mode
+Uses Amazon Bedrock for natural-language intent interpretation.
+
+### Demo Mode
+Uses a deterministic execution adapter when Bedrock access is unavailable.
+The resulting tool request passes through the same validation, authorization,
+business execution, DynamoDB, and EventBridge pipeline used by live execution.
+
+Demo mode exists to make the deployed demonstration reproducible and does not
+represent an Amazon Bedrock response.
+
 ## AWS Services
 * **API Gateway & Lambda**: HTTP ingress and transactional compute.
 * **Amazon Bedrock**: LLM orchestration (`anthropic.claude-3-haiku-20240307-v1:0`).

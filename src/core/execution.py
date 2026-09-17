@@ -42,7 +42,7 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
         raise
     
     # 2. Adapter Selection
-    execution_mode = os.environ.get("WBOS_EXECUTION_MODE", "demo").lower()
+    execution_mode = os.environ.get("WBOS_EXECUTION_MODE", "live").lower()
     
     if execution_mode == "live":
         from core.bedrock_adapter import BedrockAdapter
