@@ -197,7 +197,6 @@ export default async function ExecutiveCockpit() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-bold flex items-center justify-between">
               Inventory Intelligence
-              <Badge variant="outline" className="text-text-muted">Demo Surface</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -227,7 +226,6 @@ export default async function ExecutiveCockpit() {
           <CardHeader>
             <CardTitle className="text-lg font-bold flex items-center gap-2 justify-between">
               Recent Conversations
-              <Badge variant="outline" className="text-text-muted">Demo Surface</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>

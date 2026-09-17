@@ -100,12 +100,14 @@ export default function RootLayout({
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-wa-green shadow-[0_0_8px_rgba(0,168,132,0.6)] animate-pulse"></span>
-                <span className="text-[11px] font-bold text-wa-green-dark uppercase tracking-wide">API Gateway — Connected</span>
+                <span className="text-[11px] font-bold text-wa-green-dark uppercase tracking-wide">AWS Backend — Connected</span>
               </div>
               
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent-indigo shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse"></span>
-                <span className="text-[11px] font-bold text-accent-indigo uppercase tracking-wide">Bedrock — Configured</span>
+                <span className="text-[11px] font-bold text-accent-indigo uppercase tracking-wide">
+                  {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' ? 'Demo Execution Adapter — Active' : 'Bedrock — Configured'}
+                </span>
               </div>
 
               <div className="flex items-center gap-2">

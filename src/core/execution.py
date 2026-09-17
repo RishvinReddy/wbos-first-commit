@@ -1,10 +1,10 @@
 import json
 import logging
 import datetime
+import os
 from botocore.exceptions import ClientError
 from core.db import get_client
 from core.config import config
-from core.bedrock_adapter import BedrockAdapter
 from core.tool_router import handle_tool_use
 
 logger = logging.getLogger()
@@ -41,8 +41,17 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
             return {"status": "duplicate"}
         raise
     
-    # 2. Bedrock Adapter
-    bedrock = BedrockAdapter()
+    # 2. Adapter Selection
+    execution_mode = os.environ.get("WBOS_EXECUTION_MODE", "demo").lower()
+    
+    if execution_mode == "live":
+        from core.bedrock_adapter import BedrockAdapter
+        adapter = BedrockAdapter()
+        logger.info(json.dumps({"action": "execution_mode", "mode": "live", "requestId": req_id}))
+    else:
+        from core.demo_adapter import DemoAdapter
+        adapter = DemoAdapter()
+        logger.info(json.dumps({"action": "execution_mode", "mode": "demo", "requestId": req_id}))
     
     # Construct conversational history
     messages = [{
@@ -57,8 +66,8 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
         "Never make up prices or stock."
     )
     
-    # Call Bedrock
-    bedrock_response = bedrock.converse(messages, system_prompt)
+    # Call Adapter
+    bedrock_response = adapter.converse(messages, system_prompt)
     
     # 3. Tool Router
     # Bedrock response might contain toolUse blocks

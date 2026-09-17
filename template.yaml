@@ -14,6 +14,7 @@ Globals:
         DYNAMODB_TABLE: !Ref WBOSStoreTable
         BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20240620-v1:0"
         EVENT_BUS_NAME: !Ref WBOSEventBus
+        WBOS_EXECUTION_MODE: "demo"
 
   HttpApi:
     CorsConfiguration:
@@ -196,15 +197,19 @@ Resources:
       CodeUri: src/
       Handler: handlers.dashboard.lambda_handler
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
         - Statement:
             - Effect: Allow
               Action:
-                - dynamodb:GetItem
-                - dynamodb:Query
-                - dynamodb:Scan
-              Resource: 
-                - !GetAtt WBOSStoreTable.Arn
-                - !Sub "${WBOSStoreTable.Arn}/index/*"
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: !GetAtt WBOSEventBus.Arn
       Events:
         DashboardApi:
           Type: HttpApi
