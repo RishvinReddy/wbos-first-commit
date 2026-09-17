@@ -2,29 +2,55 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, MoreVertical, Paperclip, Send, Check, CheckCheck } from "lucide-react";
+import { Search, MoreVertical, Paperclip, Send, Check, CheckCheck, Loader2 } from "lucide-react";
+import { simulateWebhook } from "@/lib/api";
 
 export default function ConversationsPage() {
   const [message, setMessage] = useState("");
-
+  const [isSending, setIsSending] = useState(false);
+  
   const contacts = [
-    { name: "Rahul Sharma", time: "10:42 AM", preview: "I need 2kg basmati rice", unread: 2, active: true },
+    { name: "Rahul Sharma", time: "10:42 AM", preview: "Active simulator session", unread: 2, active: true },
     { name: "Priya Reddy", time: "Yesterday", preview: "Perfect, thanks!", unread: 0, active: false },
     { name: "Arjun Kumar", time: "Tuesday", preview: "When will it arrive?", unread: 0, active: false },
     { name: "Sneha Gupta", time: "Monday", preview: "Can I add 1L oil to my order?", unread: 0, active: false },
   ];
 
-  const chat = [
-    { sender: "Customer", time: "10:30 AM", text: "Hi, do you have Basmati rice in stock?" },
+  const [chat, setChat] = useState([
+    { sender: "Customer", time: "10:30 AM", text: "Hi, do you have Basmati rice in stock?", isBot: false },
     { sender: "WBOS", time: "10:30 AM", text: "Yes, we have Basmati Rice available. How much do you need?", isBot: true },
-    { sender: "Customer", time: "10:42 AM", text: "I need 2kg basmati rice and cooking oil" },
-  ];
+  ]);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    // In UI-4 this will actually post to our demo API.
+    if (!message.trim() || isSending) return;
+    
+    const userMsg = message;
     setMessage("");
+    setIsSending(true);
+    
+    const timeNow = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    setChat(prev => [...prev, { sender: "Customer", time: timeNow, text: userMsg, isBot: false }]);
+    
+    try {
+      // In a real scenario, response would come asynchronously via webhook to WhatsApp.
+      // Here, we wait for the synchronous simulator response for demo purposes.
+      const res = await simulateWebhook(userMsg);
+      
+      let replyText = "Message processed.";
+      if (res.operations && res.operations.length > 0) {
+        replyText = `Action executed: ${res.operations.map((o: any) => o.tool).join(', ')}`;
+      } else if (res.status === "duplicate") {
+        replyText = "Message was flagged as duplicate.";
+      }
+      
+      setChat(prev => [...prev, { sender: "WBOS", time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), text: replyText, isBot: true }]);
+    } catch (err: any) {
+      setChat(prev => [...prev, { sender: "System", time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), text: `Error: ${err.message}`, isBot: true }]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -87,8 +113,11 @@ export default function ConversationsPage() {
               R
             </div>
             <div>
-              <div className="font-bold">Rahul Sharma</div>
-              <div className="text-xs text-text-muted font-medium">Customer • +91 98765 43210</div>
+              <div className="font-bold flex items-center gap-2">
+                Rahul Sharma 
+                <span className="text-[10px] bg-wa-green/20 text-wa-green px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">Simulator</span>
+              </div>
+              <div className="text-xs text-text-muted font-medium">Customer • +91 9347761153</div>
             </div>
           </div>
           <div className="flex items-center gap-4 text-text-muted">
@@ -127,6 +156,17 @@ export default function ConversationsPage() {
               </div>
             );
           })}
+          
+          {isSending && (
+            <div className="flex justify-end">
+              <div className="bg-[#d9fdd3] rounded-lg rounded-tr-none px-4 py-3 shadow-sm relative text-[#111b21]">
+                 <div className="absolute top-0 w-3 h-3 -right-2 text-[#d9fdd3]">
+                    <svg viewBox="0 0 8 13" width="8" height="13" className="fill-current"><path d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path></svg>
+                  </div>
+                 <Loader2 className="h-4 w-4 animate-spin text-wa-green" />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Chat Input */}
@@ -140,12 +180,13 @@ export default function ConversationsPage() {
               type="text" 
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type a message..." 
-              className="w-full bg-white rounded-xl px-4 py-3 text-[15px] focus:outline-none shadow-sm"
+              disabled={isSending}
+              placeholder="Type a simulated message..." 
+              className="w-full bg-white rounded-xl px-4 py-3 text-[15px] focus:outline-none shadow-sm disabled:opacity-50"
             />
           </form>
           
-          {message.trim() ? (
+          {message.trim() && !isSending ? (
             <button 
               onClick={handleSend}
               className="w-12 h-12 rounded-full bg-wa-green text-white flex items-center justify-center hover:bg-wa-green-dark transition-colors shadow-sm shrink-0"
@@ -153,7 +194,7 @@ export default function ConversationsPage() {
               <Send className="h-5 w-5 ml-1" />
             </button>
           ) : (
-            <button className="w-12 h-12 rounded-full bg-transparent text-text-muted hover:text-text-primary flex items-center justify-center transition-colors shrink-0">
+            <button className="w-12 h-12 rounded-full bg-transparent text-text-muted hover:text-text-primary flex items-center justify-center transition-colors shrink-0 disabled:opacity-50">
               <svg viewBox="0 0 24 24" width="24" height="24" className="fill-current"><path d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2.002z"></path></svg>
             </button>
           )}

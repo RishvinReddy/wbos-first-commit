@@ -1,6 +1,8 @@
 import json
 import logging
-from core.auth import resolve_dashboard_context, AccessDeniedError
+import uuid
+from core.auth import resolve_dashboard_context, resolve_execution_context, AccessDeniedError
+from core.execution import execute_message
 from services.analytics import get_daily_sales, get_sales_summary, get_pending_orders, get_low_stock_products
 from boto3.dynamodb.conditions import Key
 from core.db import get_table
@@ -52,14 +54,6 @@ def lambda_handler(event, context):
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
             
         elif path == "/api/inventory":
-            # Tenant-scoped inventory query using GSI1 (if mapped by Category) or a scan with tenantId.
-            # In Phase 5 review, user stated: 
-            # "For inventory, use the access pattern supported by your current data-model.md"
-            # Our data-model.md states GSI1 is TENANT#...#CAT#<category>. 
-            # To get all inventory, a common pattern is to just query GSI1 if a special "ALL" category exists,
-            # or we can do a Query on GSI4 if we added one. But the user said "If current model doesn't provide it, add smallest appropriate index".
-            # Let's add GSI4 (TENANT#{tenant_id}#PRODUCTS) to template.yaml and orders.py soon, but for now we can just use the scan fallback, 
-            # or add a specific query. Let's assume we implement the query properly using a new GSI4.
             table = get_table()
             
             # We use GSI3 where GSI3PK = TENANT#{tenant_id}#PRODUCTS
@@ -101,6 +95,39 @@ def lambda_handler(event, context):
             
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
             
+        elif path == "/api/simulator/webhook":
+            body_str = event.get("body", "{}")
+            if event.get("isBase64Encoded"):
+                import base64
+                body_str = base64.b64decode(body_str).decode('utf-8')
+            
+            payload = json.loads(body_str)
+            message_text = payload.get("message", "")
+            customer_phone = payload.get("phone", "+919347761153")
+            
+            # Generate a mock message ID for idempotency tracking
+            message_id = "sim_wamid_" + str(uuid.uuid4())
+            req_id = context.aws_request_id if context else "local_sim"
+            
+            # Resolve the demo identity for the execution
+            demo_context = resolve_execution_context(customer_phone)
+            
+            # Ensure the demo user belongs to the same tenant as the dashboard OWNER
+            if demo_context.tenant_id != tenant_id:
+                raise AccessDeniedError("Simulator customer tenant mismatch")
+            
+            logger.info(json.dumps({
+                "action": "simulator_invoked",
+                "requestId": req_id,
+                "tenantId": demo_context.tenant_id,
+                "simulatedRole": demo_context.role
+            }))
+            
+            # Shared WBOS execution pipeline
+            result = execute_message(demo_context, message_text, message_id, req_id)
+            
+            return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(result)}
+            
         else:
             return {"statusCode": 404, "headers": _cors_headers(), "body": json.dumps({"error": "Not Found"})}
             
@@ -110,3 +137,4 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"Internal Error: {e}")
         return {"statusCode": 500, "headers": _cors_headers(), "body": json.dumps({"error": "Internal Server Error"})}
+
