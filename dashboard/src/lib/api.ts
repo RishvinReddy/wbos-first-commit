@@ -1,8 +1,9 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api';
+const OWNER_TOKEN = process.env.NEXT_PUBLIC_OWNER_TOKEN || 'OWNER_TOKEN';
 
 export async function fetchMetrics() {
     const res = await fetch(`${API_URL}/metrics`, {
-        headers: { 'Authorization': 'Bearer OWNER_TOKEN' },
+        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch metrics');
@@ -11,7 +12,7 @@ export async function fetchMetrics() {
 
 export async function fetchOrders() {
     const res = await fetch(`${API_URL}/orders`, {
-        headers: { 'Authorization': 'Bearer OWNER_TOKEN' },
+        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch orders');
@@ -20,7 +21,7 @@ export async function fetchOrders() {
 
 export async function fetchInventory() {
     const res = await fetch(`${API_URL}/inventory`, {
-        headers: { 'Authorization': 'Bearer OWNER_TOKEN' },
+        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch inventory');
@@ -29,7 +30,7 @@ export async function fetchInventory() {
 
 export async function fetchEvents() {
     const res = await fetch(`${API_URL}/events`, {
-        headers: { 'Authorization': 'Bearer OWNER_TOKEN' },
+        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch events');

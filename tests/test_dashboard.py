@@ -8,7 +8,6 @@ def test_dashboard_api_metrics(setup_db):
         "headers": {"Authorization": "Bearer OWNER_TOKEN"}
     }
     
-    # Needs OWNER_TOKEN or no mock token to default to OWNER for MVP
     response = lambda_handler(event, None)
     assert response["statusCode"] == 200
     
@@ -19,7 +18,7 @@ def test_dashboard_api_inventory(setup_db):
     event = {
         "rawPath": "/api/inventory",
         "requestContext": {"http": {"method": "GET"}},
-        "headers": {}
+        "headers": {"Authorization": "Bearer OWNER_TOKEN"}
     }
     response = lambda_handler(event, None)
     assert response["statusCode"] == 200
@@ -39,6 +38,37 @@ def test_dashboard_api_tenant_isolation():
     response = lambda_handler(event, None)
     assert response["statusCode"] == 403
     assert "restricted to OWNER role" in response["body"]
+
+def test_dashboard_api_missing_or_invalid_token():
+    # Verify missing token
+    event_missing = {
+        "rawPath": "/api/metrics",
+        "requestContext": {"http": {"method": "GET"}},
+        "headers": {}
+    }
+    response_missing = lambda_handler(event_missing, None)
+    assert response_missing["statusCode"] == 403
+    assert "Invalid or missing dashboard credentials" in response_missing["body"]
+
+    # Verify invalid token
+    event_invalid = {
+        "rawPath": "/api/metrics",
+        "requestContext": {"http": {"method": "GET"}},
+        "headers": {"Authorization": "Bearer RANDOM_TOKEN"}
+    }
+    response_invalid = lambda_handler(event_invalid, None)
+    assert response_invalid["statusCode"] == 403
+    assert "Invalid or missing dashboard credentials" in response_invalid["body"]
+
+    # Verify regression test for original vulnerability (trailing characters)
+    event_trailing = {
+        "rawPath": "/api/metrics",
+        "requestContext": {"http": {"method": "GET"}},
+        "headers": {"Authorization": "Bearer OWNER_TOKEN_EXTRA"}
+    }
+    response_trailing = lambda_handler(event_trailing, None)
+    assert response_trailing["statusCode"] == 403
+    assert "Invalid or missing dashboard credentials" in response_trailing["body"]
 
 def test_dashboard_api_cross_tenant_injection(setup_db):
     # P5.23 Cross-tenant access test

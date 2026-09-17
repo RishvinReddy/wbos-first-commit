@@ -78,23 +78,26 @@ def authorize_tool(context: ExecutionContext, tool_name: str) -> bool:
 def resolve_dashboard_context(headers: dict) -> ExecutionContext:
     """
     Deterministically resolves the caller's identity for the Dashboard API.
-    For MVP, authenticates based on a mock Authorization header or defaults to OWNER for ease of local testing.
+
+    MVP authentication uses explicit demo credentials. Unknown or missing
+    credentials are rejected rather than defaulting to OWNER.
     """
     auth_header = headers.get("authorization", "")
-    
-    # In a real app, this would verify a JWT from Cognito/Auth0 and extract the tenant.
-    # For MVP, we assume the dashboard is operated by the owner of TENANT_001.
-    if "Bearer CUSTOMER_TOKEN" in auth_header:
+
+    if auth_header == "Bearer OWNER_TOKEN":
+        return ExecutionContext(
+            tenant_id="TENANT_001",
+            actor_id="OWNER_USER",
+            role="OWNER",
+            channel="WEB"
+        )
+
+    if auth_header == "Bearer CUSTOMER_TOKEN":
         return ExecutionContext(
             tenant_id="TENANT_001",
             actor_id="CUS_MOCK",
             role="CUSTOMER",
             channel="WEB"
         )
-        
-    return ExecutionContext(
-        tenant_id="TENANT_001",
-        actor_id="OWNER_USER",
-        role="OWNER",
-        channel="WEB"
-    )
+
+    raise AccessDeniedError("Invalid or missing dashboard credentials")
