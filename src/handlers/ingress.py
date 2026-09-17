@@ -18,6 +18,13 @@ def lambda_handler(event, context):
     API Gateway -> security -> normalization -> Bedrock -> tool router
     """
     try:
+        # P6.4 Structured observability
+        req_id = context.aws_request_id if context else "local"
+        logger.info(json.dumps({
+            "action": "webhook_received",
+            "requestId": req_id
+        }))
+
         # 1. Security: HMAC Validation
         headers = event.get("headers", {})
         signature = headers.get("x-hub-signature-256") or headers.get("X-Hub-Signature-256")
@@ -58,6 +65,13 @@ def lambda_handler(event, context):
         tenant_id = context_obj.tenant_id
         customer_id = context_obj.actor_id
         
+        logger.info(json.dumps({
+            "action": "auth_resolved",
+            "requestId": req_id,
+            "tenantId": tenant_id,
+            "role": context_obj.role
+        }))
+        
         # 3. Idempotency Check
         client = get_client()
         now = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
@@ -74,7 +88,11 @@ def lambda_handler(event, context):
             )
         except ClientError as e:
             if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-                logger.info(f"Duplicate message {message_id} detected. Returning early.")
+                logger.info(json.dumps({
+                    "action": "duplicate_message",
+                    "requestId": req_id,
+                    "messageId": message_id
+                }))
                 return {"statusCode": 200, "body": json.dumps({"status": "duplicate"})}
             raise
         
@@ -104,7 +122,11 @@ def lambda_handler(event, context):
             for block in bedrock_response["content"]:
                 if "toolUse" in block:
                     tool_use = block["toolUse"]
-                    logger.info(f"Routing tool: {tool_use['name']}")
+                    logger.info(json.dumps({
+                        "action": "tool_routing",
+                        "requestId": req_id,
+                        "tool": tool_use["name"]
+                    }))
                     
                     # 5. Domain Service & DB
                     result = handle_tool_use(context_obj, tool_use)
@@ -113,6 +135,13 @@ def lambda_handler(event, context):
                         "result": result
                     })
                     
+        logger.info(json.dumps({
+            "action": "bedrock_processed",
+            "requestId": req_id,
+            "tenantId": tenant_id,
+            "status": "success"
+        }))
+
         # Return 200 OK to Meta to acknowledge receipt
         return {
             "statusCode": 200,
@@ -120,8 +149,17 @@ def lambda_handler(event, context):
         }
         
     except InvalidSignatureError as e:
-        logger.warning(f"Signature verification failed: {e}")
+        logger.warning(json.dumps({
+            "action": "signature_verification_failed",
+            "requestId": req_id if 'req_id' in locals() else "local",
+            "error": str(e)
+        }))
         return {"statusCode": 401, "body": "Unauthorized"}
     except Exception as e:
-        logger.error(f"Internal error: {e}")
-        return {"statusCode": 500, "body": str(e)}
+        req_id = req_id if 'req_id' in locals() else "local"
+        logger.error(json.dumps({
+            "action": "webhook_error",
+            "requestId": req_id,
+            "error": str(e)
+        }))
+        return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
