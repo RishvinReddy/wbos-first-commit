@@ -75,7 +75,7 @@ export default function AssistantPage() {
 
       <Card className="flex-1 flex flex-col bg-[#1e1e1e] border-border-color shadow-card overflow-hidden relative">
         {/* Terminal Header */}
-        <div className="h-10 bg-[#2d2d2d] flex items-center px-4 border-b border-black/40 shadow-sm z-10 gap-2">
+        <div className="h-10 bg-[#2d2d2d] flex items-center px-4 border-b border-black/40 shadow-subtle z-10 gap-2">
           <Terminal className="h-4 w-4 text-gray-400" />
           <span className="text-xs font-bold text-gray-400 font-jetbrains">wbos-bedrock-cli</span>
         </div>
@@ -84,7 +84,7 @@ export default function AssistantPage() {
         <div className="flex-1 overflow-y-auto p-6 space-y-6 z-10 font-jetbrains">
           {history.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-xl px-4 py-3 shadow-sm ${msg.role === 'user' ? 'bg-wa-green/20 border border-wa-green/30 text-white' : 'bg-[#2d2d2d] border border-white/10 text-gray-200'}`}>
+              <div className={`max-w-[80%] rounded-xl px-4 py-3 shadow-subtle ${msg.role === 'user' ? 'bg-wa-green/20 border border-wa-green/30 text-white' : 'bg-[#2d2d2d] border border-white/10 text-gray-200'}`}>
                 {msg.role === 'user' ? (
                   <div className="text-sm font-medium">{msg.content}</div>
                 ) : (

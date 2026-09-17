@@ -75,7 +75,7 @@ export default function ConversationsPage() {
             <div 
               key={i} 
               className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
-                contact.active ? 'bg-white shadow-sm border border-black/5' : 'hover:bg-white/40 border border-transparent'
+                contact.active ? 'bg-white shadow-subtle border border-black/5' : 'hover:bg-white/40 border border-transparent'
               }`}
             >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-text-secondary font-bold text-lg shrink-0">
@@ -107,7 +107,7 @@ export default function ConversationsPage() {
       {/* 2. WhatsApp Simulator */}
       <Card className="flex-1 flex flex-col bg-[#efeae2] border-border-color shadow-card overflow-hidden relative">
         {/* Chat Header */}
-        <div className="h-16 bg-white flex items-center justify-between px-4 shadow-sm z-10 border-b border-black/5">
+        <div className="h-16 bg-white flex items-center justify-between px-4 shadow-subtle z-10 border-b border-black/5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-text-secondary font-bold">
               R
@@ -132,7 +132,7 @@ export default function ConversationsPage() {
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 z-10 space-y-4">
           <div className="flex justify-center mb-6">
-            <div className="bg-[#e1f3fb] text-[#4a5e66] text-xs font-semibold px-3 py-1 rounded-lg shadow-sm border border-black/5">
+            <div className="bg-[#e1f3fb] text-[#4a5e66] text-xs font-semibold px-3 py-1 rounded-lg shadow-subtle border border-black/5">
               TODAY
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function ConversationsPage() {
             const isBot = msg.isBot;
             return (
               <div key={i} className={`flex ${isBot ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] rounded-lg px-3 py-2 shadow-sm relative ${isBot ? 'bg-[#d9fdd3] rounded-tr-none' : 'bg-white rounded-tl-none'}`}>
+                <div className={`max-w-[70%] rounded-lg px-3 py-2 shadow-subtle relative ${isBot ? 'bg-[#d9fdd3] rounded-tr-none' : 'bg-white rounded-tl-none'}`}>
                   {/* Tail indicator for WhatsApp bubble */}
                   <div className={`absolute top-0 w-3 h-3 ${isBot ? '-right-2 text-[#d9fdd3]' : '-left-2 text-white'}`}>
                     <svg viewBox="0 0 8 13" width="8" height="13" className="fill-current"><path d={isBot ? "M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z" : "M2.812 1H8v11.193L1.533 3.568C.474 2.156 1.042 1 2.812 1z"}></path></svg>
@@ -159,7 +159,7 @@ export default function ConversationsPage() {
           
           {isSending && (
             <div className="flex justify-end">
-              <div className="bg-[#d9fdd3] rounded-lg rounded-tr-none px-4 py-3 shadow-sm relative text-[#111b21]">
+              <div className="bg-[#d9fdd3] rounded-lg rounded-tr-none px-4 py-3 shadow-subtle relative text-[#111b21]">
                  <div className="absolute top-0 w-3 h-3 -right-2 text-[#d9fdd3]">
                     <svg viewBox="0 0 8 13" width="8" height="13" className="fill-current"><path d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path></svg>
                   </div>
@@ -182,14 +182,14 @@ export default function ConversationsPage() {
               onChange={(e) => setMessage(e.target.value)}
               disabled={isSending}
               placeholder="Type a simulated message..." 
-              className="w-full bg-white rounded-xl px-4 py-3 text-[15px] focus:outline-none shadow-sm disabled:opacity-50"
+              className="w-full bg-white rounded-xl px-4 py-3 text-[15px] focus:outline-none shadow-subtle disabled:opacity-50"
             />
           </form>
           
           {message.trim() && !isSending ? (
             <button 
               onClick={handleSend}
-              className="w-12 h-12 rounded-full bg-wa-green text-white flex items-center justify-center hover:bg-wa-green-dark transition-colors shadow-sm shrink-0"
+              className="w-12 h-12 rounded-full bg-wa-green text-white flex items-center justify-center hover:bg-wa-green-dark transition-colors shadow-subtle shrink-0"
             >
               <Send className="h-5 w-5 ml-1" />
             </button>

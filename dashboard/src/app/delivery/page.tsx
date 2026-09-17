@@ -43,10 +43,10 @@ export default function DeliveryPage() {
           </CardHeader>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {drivers.map(driver => (
-              <div key={driver.id} className="p-4 rounded-xl bg-white border border-white/60 shadow-sm">
+              <div key={driver.id} className="p-4 rounded-xl bg-white border border-white/60 shadow-subtle">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-sm ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-subtle ${
                       driver.status === 'delivering' ? 'bg-wa-green' : 
                       driver.status === 'returning' ? 'bg-accent-amber' : 'bg-text-muted'
                     }`}>
@@ -123,9 +123,9 @@ export default function DeliveryPage() {
             </CardHeader>
             <div className="flex-1 p-4 overflow-y-auto space-y-3">
               {activeDeliveries.map((delivery, i) => (
-                <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-white border border-white/60 shadow-sm">
+                <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-white border border-white/60 shadow-subtle">
                   <div className="flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-sm ${
+                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-subtle ${
                       delivery.driver === 'Pending' ? 'bg-accent-amber/10 text-accent-amber' : 'bg-wa-green/10 text-wa-green'
                     }`}>
                       {delivery.driver === 'Pending' ? <Package className="h-6 w-6" /> : <Truck className="h-6 w-6" />}

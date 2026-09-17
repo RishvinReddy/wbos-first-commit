@@ -1,48 +1,66 @@
 :root {
-  /* Color Palette */
-  --bg-dark: #edf0f5;
-  --card-bg: rgba(255, 255, 255, 0.68);
-  --border-color: rgba(255, 255, 255, 0.7);
-  
-  /* Text */
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  
-  /* WhatsApp Theme Colors */
-  --wa-green: #00a884;
-  --wa-green-dark: #008069;
+  /* =========================================================
+     WBOS BRAND
+     ========================================================= */
+
+  --wbos-green: #00A884;
+  --wbos-green-dark: #008F72;
+  --wbos-green-soft: #E8F7F3;
+
+  /* =========================================================
+     INK / TYPOGRAPHY
+     ========================================================= */
+
+  --wbos-ink: #101828;
+  --wbos-ink-soft: #344054;
+  --wbos-muted: #667085;
+
+  /* =========================================================
+     BACKGROUNDS & SURFACES
+     ========================================================= */
+
+  --wbos-bg: #F8FAFC;
+  --wbos-surface: #FFFFFF;
+
+  /* =========================================================
+     BORDERS
+     ========================================================= */
+
+  --wbos-border: #E4E7EC;
+
+  /* =========================================================
+     SEMANTIC COLORS
+     ========================================================= */
+
+  --success: #00A884;
+  --success-soft: #E8F7F3;
+
+  --info: #3B82F6;
+  --info-soft: #EFF6FF;
+
+  --warning: #F59E0B;
+  --warning-soft: #FEF3C7;
+
+  --danger: #EF4444;
+  --danger-soft: #FEE2E2;
+
+  --ai: #6366F1;
+  --ai-soft: #EEF2FF;
+
+  --event: #0891B2;
+  --event-soft: #ECFEFF;
+
+  /* =========================================================
+     RADII & SHADOWS
+     ========================================================= */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-subtle: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+  /* WhatsApp Theme Colors (Legacy Support) */
   --wa-bg: #efeae2;
   --wa-bubble-self: #d9fdd3;
-  --wa-bubble-other: #ffffff;
-
-  /* Theme Accents */
-  --accent-indigo: #6366f1;
-  --accent-cyan: #06b6d4;
-  --accent-amber: #f59e0b;
-  --accent-red: #ef4444;
-  --accent-pink: #ec4899;
-
-  /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-
-  /* Radius */
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 24px;
-  --radius-xl: 28px;
-  
-  /* Shadows */
-  --shadow-card: 0 16px 36px 0 rgba(148, 163, 184, 0.12), inset 6px 6px 12px 0 rgba(255, 255, 255, 0.95), inset -6px -6px 12px 0 rgba(148, 163, 184, 0.14);
-  --shadow-header: 0 12px 28px rgba(148, 163, 184, 0.08), inset 4px 4px 8px rgba(255, 255, 255, 0.9), inset -4px -4px 8px rgba(148, 163, 184, 0.1);
-  --shadow-badge: 0 4px 12px rgba(148, 163, 184, 0.04), inset 2px 2px 4px rgba(255, 255, 255, 0.9), inset -2px -2px 4px rgba(148, 163, 184, 0.1);
-  
-  /* Background Blobs */
-  --blob-purple: var(--accent-indigo);
-  --blob-blue: var(--accent-cyan);
-  --blob-pink: var(--accent-pink);
 }

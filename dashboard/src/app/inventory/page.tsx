@@ -42,10 +42,10 @@ export default async function InventoryPage() {
             <input 
               type="text" 
               placeholder="Search products..." 
-              className="w-full bg-card/60 backdrop-blur-md border border-border-color rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wa-green/30 shadow-sm"
+              className="w-full bg-card/60 backdrop-blur-md border border-border-color rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wa-green/30 shadow-subtle"
             />
           </div>
-          <button className="bg-card/60 backdrop-blur-md border border-border-color shadow-sm p-2 rounded-xl text-text-secondary hover:text-text-primary transition-colors">
+          <button className="bg-card/60 backdrop-blur-md border border-border-color shadow-subtle p-2 rounded-xl text-text-secondary hover:text-text-primary transition-colors">
             <Filter className="h-5 w-5" />
           </button>
         </div>
@@ -138,7 +138,7 @@ export default async function InventoryPage() {
                                  'bg-wa-green/10 text-wa-green border-wa-green/20';
 
               return (
-                <div key={item.id} className="grid grid-cols-[2fr_1fr_2fr_1fr_1fr] gap-4 px-4 py-4 items-center bg-white/40 rounded-xl border border-white/60 hover:bg-white/60 transition-colors shadow-sm">
+                <div key={item.id} className="grid grid-cols-[2fr_1fr_2fr_1fr_1fr] gap-4 px-4 py-4 items-center bg-white/40 rounded-xl border border-white/60 hover:bg-white/60 transition-colors shadow-subtle">
                   <div>
                     <div className="font-bold text-sm">{item.name}</div>
                     <div className="text-xs text-text-muted font-jetbrains mt-0.5">{item.id} • ₹{item.price}</div>
@@ -168,7 +168,7 @@ export default async function InventoryPage() {
                   
                   <div className="text-right">
                     {isLow ? (
-                      <button className="bg-text-primary text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 hover:bg-black transition-colors ml-auto shadow-sm">
+                      <button className="bg-text-primary text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 hover:bg-black transition-colors ml-auto shadow-subtle">
                         Reorder <ArrowRight className="h-3 w-3" />
                       </button>
                     ) : (

@@ -103,7 +103,7 @@ export default async function EventsPage() {
               
               <div className="flex flex-col items-center">
                 {/* Source */}
-                <div className="w-48 bg-white border border-border-color shadow-sm rounded-xl p-3 text-center z-10">
+                <div className="w-48 bg-white border border-border-color shadow-subtle rounded-xl p-3 text-center z-10">
                   <div className="font-bold text-sm">ORDER_CREATED</div>
                   <div className="text-[10px] text-text-muted font-bold mt-1 uppercase tracking-wider">Source: WhatsApp / API</div>
                 </div>
@@ -111,7 +111,7 @@ export default async function EventsPage() {
                 <ArrowDown className="h-6 w-6 text-text-muted my-2 animate-bounce" />
 
                 {/* EventBridge */}
-                <div className="w-56 bg-gradient-to-br from-[#ff9900] to-[#ffb84d] text-white shadow-md rounded-xl p-3 text-center z-10">
+                <div className="w-56 bg-gradient-to-br from-[#ff9900] to-[#ffb84d] text-white shadow-subtle rounded-xl p-3 text-center z-10">
                   <div className="font-extrabold flex items-center justify-center gap-2">
                     <Activity className="h-4 w-4" /> Amazon EventBridge
                   </div>
@@ -127,19 +127,19 @@ export default async function EventsPage() {
 
                 {/* Targets */}
                 <div className="flex w-full justify-between gap-2 z-10">
-                  <div className="flex-1 bg-white border border-accent-indigo/20 shadow-sm rounded-xl p-3 text-center flex flex-col items-center">
+                  <div className="flex-1 bg-white border border-accent-indigo/20 shadow-subtle rounded-xl p-3 text-center flex flex-col items-center">
                     <FileText className="h-5 w-5 text-accent-indigo mb-1" />
                     <div className="font-bold text-[11px]">Invoice Lambda</div>
                     <div className="text-[9px] text-text-muted mt-0.5">S3 PDF Gen</div>
                   </div>
                   
-                  <div className="flex-1 bg-white border border-accent-amber/20 shadow-sm rounded-xl p-3 text-center flex flex-col items-center">
+                  <div className="flex-1 bg-white border border-accent-amber/20 shadow-subtle rounded-xl p-3 text-center flex flex-col items-center">
                     <Bell className="h-5 w-5 text-accent-amber mb-1" />
                     <div className="font-bold text-[11px]">Notify Lambda</div>
                     <div className="text-[9px] text-text-muted mt-0.5">SNS SMS</div>
                   </div>
                   
-                  <div className="flex-1 bg-white border border-accent-cyan/20 shadow-sm rounded-xl p-3 text-center flex flex-col items-center">
+                  <div className="flex-1 bg-white border border-accent-cyan/20 shadow-subtle rounded-xl p-3 text-center flex flex-col items-center">
                     <LayoutDashboard className="h-5 w-5 text-accent-cyan mb-1" />
                     <div className="font-bold text-[11px]">Dashboard API</div>
                     <div className="text-[9px] text-text-muted mt-0.5">DynamoDB Metrics</div>
@@ -178,10 +178,10 @@ export default async function EventsPage() {
                 )}
                 {events.map((event) => (
                   <div key={event.id} className="relative flex items-start gap-4 group">
-                    <div className={`mt-0.5 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white ${event.bg} ${event.color} shadow-sm shrink-0 z-10 transition-transform group-hover:scale-110`}>
+                    <div className={`mt-0.5 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white ${event.bg} ${event.color} shadow-subtle shrink-0 z-10 transition-transform group-hover:scale-110`}>
                       <event.icon className="h-5 w-5" />
                     </div>
-                    <div className="flex-1 bg-white/60 border border-white p-3 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex-1 bg-white/60 border border-white p-3 rounded-xl shadow-subtle hover:shadow-subtle transition-shadow">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
                           <span className={`font-bold ${event.color}`}>{event.type}</span>

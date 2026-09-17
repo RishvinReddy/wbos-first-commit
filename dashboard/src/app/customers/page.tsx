@@ -36,7 +36,7 @@ export default function CustomersPage() {
               <div 
                 key={c.id} 
                 className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all ${
-                  i === 0 ? 'bg-white shadow-sm border border-wa-green/30' : 'hover:bg-white/40 border border-transparent'
+                  i === 0 ? 'bg-white shadow-subtle border border-wa-green/30' : 'hover:bg-white/40 border border-transparent'
                 }`}
               >
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-wa-green/20 to-wa-green/10 flex items-center justify-center text-wa-green font-bold text-lg shrink-0 border border-wa-green/20">
@@ -71,10 +71,10 @@ export default function CustomersPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Link href="/conversations" className="flex items-center gap-2 bg-white border border-border-color shadow-sm px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-wa-green transition-colors">
+                  <Link href="/conversations" className="flex items-center gap-2 bg-white border border-border-color shadow-subtle px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-wa-green transition-colors">
                     <MessageSquare className="h-4 w-4 text-wa-green" /> Message
                   </Link>
-                  <button className="flex items-center gap-2 bg-text-primary text-white shadow-sm px-4 py-2 rounded-xl text-sm font-bold hover:bg-black transition-colors">
+                  <button className="flex items-center gap-2 bg-text-primary text-white shadow-subtle px-4 py-2 rounded-xl text-sm font-bold hover:bg-black transition-colors">
                     Edit Profile
                   </button>
                 </div>
@@ -84,7 +84,7 @@ export default function CustomersPage() {
 
           {/* Customer KPIs */}
           <div className="grid grid-cols-3 gap-4">
-            <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+            <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 text-text-muted mb-2">
                   <IndianRupee className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Total Spent</span>
@@ -92,7 +92,7 @@ export default function CustomersPage() {
                 <div className="text-2xl font-bold">₹{customers[0].spent.toLocaleString()}</div>
               </CardContent>
             </Card>
-            <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+            <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
               <CardContent className="p-5 hover:bg-white/40 transition-colors cursor-pointer group">
                 <Link href="/orders" className="block">
                   <div className="flex items-center gap-2 text-text-muted mb-2 group-hover:text-accent-indigo transition-colors">
@@ -102,7 +102,7 @@ export default function CustomersPage() {
                 </Link>
               </CardContent>
             </Card>
-            <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+            <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 text-text-muted mb-2">
                   <Clock className="h-4 w-4" /> <span className="text-xs font-bold uppercase tracking-wider">Last Active</span>
@@ -113,14 +113,14 @@ export default function CustomersPage() {
           </div>
 
           {/* Current Order & History */}
-          <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+          <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-bold">Recent Orders</CardTitle>
               <Link href="/orders" className="text-xs font-bold text-accent-indigo hover:underline">View All Pipeline</Link>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-white border border-wa-green/30 shadow-badge hover:shadow-md transition-shadow">
+                <div className="p-4 rounded-xl bg-white border border-wa-green/30 shadow-badge hover:shadow-subtle transition-shadow">
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="flex items-center gap-2">

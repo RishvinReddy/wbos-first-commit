@@ -31,7 +31,7 @@ export default function AnalyticsPage() {
           <p className="text-text-muted font-medium">Business intelligence and operational trends</p>
         </div>
         <div className="flex items-center gap-2">
-          <select className="bg-card/60 backdrop-blur-md border border-border-color shadow-sm rounded-xl px-4 py-2 text-sm font-bold text-text-secondary focus:outline-none focus:ring-2 focus:ring-wa-green/30">
+          <select className="bg-card/60 backdrop-blur-md border border-border-color shadow-subtle rounded-xl px-4 py-2 text-sm font-bold text-text-secondary focus:outline-none focus:ring-2 focus:ring-wa-green/30">
             <option>Last 7 Days</option>
             <option>Last 30 Days</option>
             <option>This Month</option>
@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
 
       {/* KPI Summary */}
       <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2 text-text-muted">
@@ -52,7 +52,7 @@ export default function AnalyticsPage() {
             <div className="text-2xl font-bold">₹19,550</div>
           </CardContent>
         </Card>
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2 text-text-muted">
@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
             <div className="text-2xl font-bold">303</div>
           </CardContent>
         </Card>
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2 text-text-muted">
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
             <div className="text-2xl font-bold">₹64.50</div>
           </CardContent>
         </Card>
-        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-sm">
+        <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-subtle">
           <CardContent className="p-5">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2 text-text-muted">

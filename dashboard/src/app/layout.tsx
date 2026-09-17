@@ -28,96 +28,95 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} antialiased flex`}>
-        {/* Background glow elements */}
-        <div className="glow-bg bg-purple"></div>
-        <div className="glow-bg bg-blue"></div>
-        
+      <body className={`${outfit.className} antialiased flex bg-wbos-bg text-wbos-ink`}>
+        {/* Subtle radial glow */}
+        <div className="absolute inset-0 z-0 pointer-events-none" style={{
+          background: 'radial-gradient(900px circle at 85% 5%, rgba(0, 168, 132, 0.035), transparent 60%)'
+        }}></div>
+
         {/* Sidebar Navigation */}
-        <nav className="w-64 border-r bg-card/80 backdrop-blur-xl flex flex-col p-4 shadow-[inset_-4px_0_8px_rgba(148,163,184,0.1)] z-10">
+        <nav className="w-64 border-r border-wbos-border bg-wbos-bg flex flex-col p-4 z-10 pb-8 h-screen overflow-y-auto">
           <div className="mb-8 flex items-center gap-3 px-2">
-            <div className="h-10 w-10 rounded-xl bg-wa-green flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-wa-green/30">
+            <div className="h-8 w-8 rounded-lg bg-wbos-green flex items-center justify-center text-white font-bold text-lg shadow-sm">
               W
             </div>
             <div>
-              <h1 className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-text-primary to-text-secondary">WBOS</h1>
-              <div className="text-[10px] font-semibold text-text-secondary uppercase tracking-widest">Command Center</div>
+              <h1 className="text-lg font-extrabold tracking-tight text-wbos-ink leading-tight">WBOS</h1>
+              <div className="text-[10px] font-semibold text-wbos-muted uppercase tracking-widest leading-tight">Command Center</div>
             </div>
           </div>
           
-          <div className="space-y-1.5 flex-1">
-            <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-4">Command Center</div>
-            <Link href="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
+          <div className="space-y-1 flex-1">
+            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-4">Workspace</div>
+            <Link href="/" className="flex items-center gap-3 rounded-md px-3 py-2 bg-success-soft text-success font-semibold text-sm transition-all">
               <LayoutDashboard className="h-4 w-4" /> Overview
             </Link>
-
-            <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">Customer</div>
-            <Link href="/conversations" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <MessageSquare className="h-4 w-4" /> Conversations
+            <Link href="/conversations" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <MessageSquare className="h-4 w-4 text-wbos-muted" /> Conversations
             </Link>
-            <Link href="/customers" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <Users className="h-4 w-4" /> Customers
+            <Link href="/customers" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <Users className="h-4 w-4 text-wbos-muted" /> Customers
             </Link>
 
-            <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">Operations</div>
-            <Link href="/orders" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <ShoppingCart className="h-4 w-4" /> Orders
+            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-6">Operations</div>
+            <Link href="/orders" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <ShoppingCart className="h-4 w-4 text-wbos-muted" /> Orders
             </Link>
-            <Link href="/inventory" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <Package className="h-4 w-4" /> Inventory
+            <Link href="/inventory" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <Package className="h-4 w-4 text-wbos-muted" /> Inventory
             </Link>
-            <Link href="/delivery" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <Truck className="h-4 w-4" /> Delivery
-            </Link>
-
-            <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">Intelligence</div>
-            <Link href="/analytics" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <BarChart3 className="h-4 w-4" /> Analytics
-            </Link>
-            <Link href="/assistant" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <Bot className="h-4 w-4 text-accent-indigo" /> AI Assistant
+            <Link href="/delivery" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <Truck className="h-4 w-4 text-wbos-muted" /> Delivery
             </Link>
 
-            <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 px-3 mt-6">System</div>
-            <Link href="/events" className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white hover:text-wa-green hover:shadow-md transition-all text-sm font-semibold text-text-secondary border border-transparent hover:border-wa-green/20">
-              <Activity className="h-4 w-4 text-accent-cyan" /> Events
+            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-6">Intelligence</div>
+            <Link href="/analytics" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <BarChart3 className="h-4 w-4 text-wbos-muted" /> Analytics
+            </Link>
+            <Link href="/assistant" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <Bot className="h-4 w-4 text-wbos-muted" /> AI Assistant
+            </Link>
+
+            <div className="text-[11px] font-bold text-wbos-muted uppercase tracking-wider mb-2 px-3 mt-6">System</div>
+            <Link href="/events" className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-wbos-surface hover:text-wbos-ink transition-all text-sm font-medium text-wbos-ink-soft">
+              <Activity className="h-4 w-4 text-wbos-muted" /> Events
             </Link>
           </div>
           
-          <div className="mt-auto border-t border-dashed border-border-color pt-4 px-2">
-            <div className="text-xs font-bold text-text-primary mb-1">TENANT_001</div>
-            <div className="text-[11px] font-semibold text-text-secondary">Owner</div>
+          <div className="mt-auto border-t border-wbos-border pt-4 px-3 flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-wbos-ink-soft"></div>
+            <div>
+              <div className="text-xs font-bold text-wbos-ink">TENANT_001</div>
+              <div className="text-[11px] font-medium text-wbos-muted">Owner</div>
+            </div>
           </div>
         </nav>
         
         {/* Main Content Area */}
-        <main className="flex-1 flex flex-col min-h-screen overflow-auto z-10">
-          <header className="h-16 flex items-center px-8 bg-card/60 backdrop-blur-xl justify-between mx-6 mt-4 rounded-2xl border border-border-color shadow-[0_4px_12px_rgba(148,163,184,0.04),inset_2px_2px_4px_rgba(255,255,255,0.9)]">
-            <div className="text-sm font-bold text-text-primary">
-              WBOS Dashboard
+        <main className="flex-1 flex flex-col min-h-screen overflow-auto z-10 relative">
+          <header className="h-14 flex items-center px-6 border-b border-wbos-border bg-wbos-surface/80 backdrop-blur-md justify-between">
+            <div className="text-sm font-semibold text-wbos-ink-soft flex items-center gap-2">
+              <span>Overview</span>
             </div>
             
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-wa-green shadow-[0_0_8px_rgba(0,168,132,0.6)] animate-pulse"></span>
-                <span className="text-[11px] font-bold text-wa-green-dark uppercase tracking-wide">AWS Backend — Connected</span>
+                <span className="h-2 w-2 rounded-full bg-success"></span>
+                <span className="text-xs font-medium text-wbos-ink">AWS Connected</span>
               </div>
               
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-accent-indigo shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse"></span>
-                <span className="text-[11px] font-bold text-accent-indigo uppercase tracking-wide">
-                  {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' ? 'Demo Execution Adapter — Active' : 'Bedrock — Configured'}
+                <span className="text-xs font-bold text-wbos-muted px-2 py-0.5 bg-wbos-bg border border-wbos-border rounded-md">
+                  {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' ? 'DEMO' : 'LIVE'}
                 </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-accent-cyan shadow-[0_0_8px_rgba(6,182,212,0.6)] animate-pulse"></span>
-                <span className="text-[11px] font-bold text-accent-cyan uppercase tracking-wide">Event Pipeline — Active</span>
+                {process.env.NEXT_PUBLIC_EXECUTION_MODE === 'demo' && (
+                  <span className="text-xs text-wbos-muted hidden md:inline-block">Deterministic Execution Adapter</span>
+                )}
               </div>
             </div>
           </header>
           
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-8">
             {children}
           </div>
         </main>

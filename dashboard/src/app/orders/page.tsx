@@ -39,7 +39,7 @@ export default async function OrdersPage() {
   }
 
   const OrderCard = ({ order, status }: { order: any, status: string }) => (
-    <div className="bg-white/80 border border-white p-3 rounded-xl shadow-sm mb-3 cursor-pointer hover:shadow-md transition-shadow group">
+    <div className="bg-white/80 border border-white p-3 rounded-xl shadow-subtle mb-3 cursor-pointer hover:shadow-subtle transition-shadow group">
       <div className="flex justify-between items-start mb-2">
         <div className="font-bold text-sm group-hover:text-wa-green transition-colors">{order.id}</div>
         <div className="text-[10px] text-text-muted font-bold flex items-center gap-1"><Clock className="h-3 w-3" /> {order.time}</div>
@@ -94,7 +94,7 @@ export default async function OrdersPage() {
       <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
         
         {/* NEW */}
-        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-sm">
+        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-subtle">
           <div className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl">
             <div className="font-bold text-sm flex items-center gap-2">
               <ShoppingCart className="h-4 w-4 text-accent-indigo" />
@@ -109,7 +109,7 @@ export default async function OrdersPage() {
         </div>
 
         {/* CONFIRMED */}
-        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-sm">
+        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-subtle">
           <div className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl">
             <div className="font-bold text-sm flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-accent-cyan" />
@@ -124,7 +124,7 @@ export default async function OrdersPage() {
         </div>
 
         {/* PREPARING */}
-        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-sm">
+        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-subtle">
           <div className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl">
             <div className="font-bold text-sm flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-accent-amber" />
@@ -139,7 +139,7 @@ export default async function OrdersPage() {
         </div>
 
         {/* DELIVERY */}
-        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-sm">
+        <div className="flex-1 min-w-[280px] flex flex-col bg-card/40 backdrop-blur-md rounded-2xl border border-border-color shadow-subtle">
           <Link href="/delivery" className="p-3 border-b border-white/40 flex justify-between items-center bg-white/30 rounded-t-2xl hover:bg-white/50 transition-colors">
             <div className="font-bold text-sm flex items-center gap-2">
               <Truck className="h-4 w-4 text-wa-green" />
