@@ -10,22 +10,37 @@ import {
   Clock,
   ArrowRight
 } from "lucide-react";
+import { fetchMetrics, fetchOrders } from "@/lib/api";
 
-export default function ExecutiveCockpit() {
-  // UI-2 DEMO DATA (Will be replaced in UI-4)
-  const metrics = {
-    revenue: 12450,
-    orders: 42,
-    aov: 296,
-    delivery_active: 8
+export default async function ExecutiveCockpit() {
+  let metrics = {
+    total_sales: 0,
+    order_count: 0,
+    average_order_value: 0,
   };
+  
+  let pipeline: any[] = [];
+  let error = null;
 
-  const pipeline = [
-    { id: "#1042", status: "Preparing", time: "2 mins ago", items: "2kg Basmati Rice, 1L Oil", customer: "Rahul" },
-    { id: "#1043", status: "New", time: "Just now", items: "500g Sugar", customer: "Priya" },
-    { id: "#1041", status: "Delivery", time: "15 mins ago", items: "Weekly Groceries", customer: "Arjun" },
-    { id: "#1040", status: "Complete", time: "1 hour ago", items: "Milk & Eggs", customer: "Sneha" },
-  ];
+  try {
+    const [metricsData, ordersData] = await Promise.all([
+      fetchMetrics(),
+      fetchOrders()
+    ]);
+    
+    metrics = {
+      total_sales: metricsData.total_sales,
+      order_count: metricsData.order_count,
+      average_order_value: metricsData.average_order_value
+    };
+    
+    pipeline = ordersData.slice(0, 5); // Take top 5 for cockpit
+  } catch (err: any) {
+    error = err.message || "Failed to load live AWS data";
+  }
+
+  // Active delivery count can be derived from pipeline or mocked for UI-4 if not available
+  const deliveryActive = 0; 
 
   const inventory = [
     { name: "Basmati Rice 1kg", stock: 8, status: "low", reorder: true },
@@ -34,18 +49,25 @@ export default function ExecutiveCockpit() {
   ];
 
   const systemEvents = [
-    { type: "OrderCreated", id: "#1043", time: "Just now", source: "WhatsApp" },
-    { type: "InventoryUpdated", id: "Basmati Rice", time: "2 mins ago", source: "System" },
-    { type: "InvoiceGenerated", id: "#1042", time: "2 mins ago", source: "Billing" },
-    { type: "NotificationRequested", id: "Rahul", time: "2 mins ago", source: "EventBridge" },
+    { type: "DashboardEvent", id: "Metrics Updated", time: "Just now", source: "AWS Bedrock" },
+    { type: "System", id: "System Online", time: "1 min ago", source: "Initialization" }
   ];
 
   return (
     <div className="space-y-6 max-w-7xl">
       <div className="flex flex-col gap-1">
         <h2 className="text-3xl font-extrabold tracking-tight">Good evening, Owner</h2>
-        <p className="text-text-muted font-medium">Here's what's happening today in your business.</p>
+        <div className="flex items-center gap-2">
+          <p className="text-text-muted font-medium">Here's what's happening today in your business.</p>
+          <Badge className="bg-wa-green/20 text-wa-green border-wa-green/30 px-2 py-0.5 text-[10px]">LIVE AWS DATA</Badge>
+        </div>
       </div>
+      
+      {error && (
+        <div className="p-4 bg-accent-red/10 border border-accent-red/30 rounded-xl text-accent-red text-sm font-bold flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" /> {error}
+        </div>
+      )}
       
       {/* 1. Executive Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -55,9 +77,9 @@ export default function ExecutiveCockpit() {
             <IndianRupee className="h-4 w-4 text-wa-green" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">₹{metrics.revenue.toLocaleString()}</div>
+            <div className="text-3xl font-bold">₹{metrics.total_sales.toLocaleString()}</div>
             <p className="text-xs text-wa-green font-semibold mt-1 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" /> +14.5% from yesterday
+              <TrendingUp className="h-3 w-3" /> Live
             </p>
           </CardContent>
         </Card>
@@ -68,8 +90,8 @@ export default function ExecutiveCockpit() {
             <ShoppingCart className="h-4 w-4 text-accent-indigo" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{metrics.orders}</div>
-            <p className="text-xs text-text-muted font-semibold mt-1">12 currently active</p>
+            <div className="text-3xl font-bold">{metrics.order_count}</div>
+            <p className="text-xs text-text-muted font-semibold mt-1">Today</p>
           </CardContent>
         </Card>
 
@@ -79,7 +101,7 @@ export default function ExecutiveCockpit() {
             <TrendingUp className="h-4 w-4 text-accent-amber" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">₹{metrics.aov}</div>
+            <div className="text-3xl font-bold">₹{metrics.average_order_value}</div>
             <p className="text-xs text-text-muted font-semibold mt-1">Average order value</p>
           </CardContent>
         </Card>
@@ -90,7 +112,7 @@ export default function ExecutiveCockpit() {
             <Truck className="h-4 w-4 text-accent-cyan" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{metrics.delivery_active}</div>
+            <div className="text-3xl font-bold">{deliveryActive}</div>
             <p className="text-xs text-text-muted font-semibold mt-1">Active operations</p>
           </CardContent>
         </Card>
@@ -108,31 +130,28 @@ export default function ExecutiveCockpit() {
           </CardHeader>
           <CardContent>
              <div className="space-y-4">
+               {pipeline.length === 0 && !error && (
+                 <div className="text-center py-6 text-text-muted font-medium text-sm">
+                   No active orders right now.
+                 </div>
+               )}
                {pipeline.map((order, i) => (
                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/40 border border-white/60 shadow-badge">
                    <div className="flex items-center gap-4">
-                     <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                       order.status === 'New' ? 'bg-accent-indigo/10 text-accent-indigo' :
-                       order.status === 'Preparing' ? 'bg-accent-amber/10 text-accent-amber' :
-                       order.status === 'Delivery' ? 'bg-accent-cyan/10 text-accent-cyan' :
-                       'bg-wa-green/10 text-wa-green'
-                     }`}>
-                       {order.status === 'New' ? <ShoppingCart className="h-4 w-4" /> :
-                        order.status === 'Preparing' ? <AlertTriangle className="h-4 w-4" /> :
-                        order.status === 'Delivery' ? <Truck className="h-4 w-4" /> :
-                        <Activity className="h-4 w-4" />}
+                     <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm bg-accent-indigo/10 text-accent-indigo`}>
+                       <ShoppingCart className="h-4 w-4" />
                      </div>
                      <div>
                        <div className="font-bold flex items-center gap-2">
-                         {order.id} <span className="text-xs font-medium text-text-muted font-jetbrains">{order.customer}</span>
+                         {order.orderId} <span className="text-xs font-medium text-text-muted font-jetbrains">{order.customer}</span>
                        </div>
-                       <div className="text-xs text-text-secondary font-medium">{order.items}</div>
+                       <div className="text-xs text-text-secondary font-medium">{order.itemCount} items • ₹{order.total}</div>
                      </div>
                    </div>
                    <div className="text-right">
-                     <div className="text-sm font-bold">{order.status}</div>
+                     <div className="text-sm font-bold">Pending</div>
                      <div className="text-xs flex items-center gap-1 text-text-muted justify-end">
-                       <Clock className="h-3 w-3" /> {order.time}
+                       <Clock className="h-3 w-3" /> {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                      </div>
                    </div>
                  </div>
@@ -178,9 +197,7 @@ export default function ExecutiveCockpit() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-bold flex items-center justify-between">
               Inventory Intelligence
-              <span className="text-xs font-bold text-accent-red flex items-center gap-1 bg-accent-red/10 px-2 py-1 rounded-md">
-                <AlertTriangle className="h-3 w-3" /> 2 Low Stock
-              </span>
+              <Badge variant="outline" className="text-text-muted">Demo Surface</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -208,8 +225,9 @@ export default function ExecutiveCockpit() {
         {/* 5. Customer Activity */}
         <Card className="bg-card/40 backdrop-blur-md border-border-color shadow-card">
           <CardHeader>
-            <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <CardTitle className="text-lg font-bold flex items-center gap-2 justify-between">
               Recent Conversations
+              <Badge variant="outline" className="text-text-muted">Demo Surface</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
