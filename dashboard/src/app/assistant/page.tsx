@@ -6,7 +6,7 @@ import { Send, Terminal, Sparkles, AlertTriangle, ArrowRight } from "lucide-reac
 
 export default function AssistantPage() {
   const [query, setQuery] = useState("");
-  const [history, setHistory] = useState([
+  const [history, setHistory] = useState<any[]>([
     {
       role: "assistant",
       content: "WBOS Intelligence is online. How can I help you manage operations today?",
