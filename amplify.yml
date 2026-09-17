@@ -1,0 +1,20 @@
+version: 1
+appRoot: dashboard
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        # Amplify injects environment variables into the build container.
+        # Next.js requires NEXT_PUBLIC_ vars to be present during build time for static export.
+        - env | grep -e NEXT_PUBLIC_ >> .env.production
+        - npm run build
+  artifacts:
+    baseDirectory: out
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
