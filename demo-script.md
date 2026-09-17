@@ -15,7 +15,7 @@
 *Type and send:* "I need 2 kg basmati rice and 1 litre milk."
 
 **Speaker:**
-> "Behind the scenes, Amazon Bedrock interprets my natural language and maps it to deterministic tools. It checks live DynamoDB inventory and creates a transactionally safe, atomic order."
+> "Behind the scenes, a deterministic execution adapter (in DEMO mode — Amazon Bedrock in the live path) maps my natural language to structured tool calls. It checks live DynamoDB inventory and creates a transactionally safe, atomic order."
 *WhatsApp responds with the order confirmation.*
 
 ### 0:50–1:15 — Event-Driven Automation
@@ -35,7 +35,7 @@
 *WhatsApp responds with a list of low-stock items.*
 
 **Speaker:**
-> "Because Bedrock is hooked up to deterministic DynamoDB analytics via Role-Based Access Control, I get perfectly accurate business intelligence in seconds."
+> "Because the execution layer is hooked up to deterministic DynamoDB analytics via Role-Based Access Control — whether through Bedrock in live mode or the DEMO adapter — I get perfectly accurate business intelligence in seconds."
 
 ### 1:45–2:20 — Web Command Center
 *Action: Open the Next.js Dashboard in the browser.*
