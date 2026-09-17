@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import './tokens.css';
+
+@import "tailwindcss";
+
+@theme {
+  --font-outfit: 'Outfit', sans-serif;
+  --font-jetbrains: 'JetBrains Mono', monospace;
+
+  --color-wa-green: var(--wa-green);
+  --color-wa-green-dark: var(--wa-green-dark);
+  --color-wa-bg: var(--wa-bg);
+  --color-wa-bubble-self: var(--wa-bubble-self);
+  --color-wa-bubble-other: var(--wa-bubble-other);
+
+  --color-accent-indigo: var(--accent-indigo);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-red: var(--accent-red);
+  --color-accent-pink: var(--accent-pink);
+
+  --color-bg-dark: var(--bg-dark);
+  --color-card-bg: var(--card-bg);
+  --color-border-color: var(--border-color);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 20px;
+  }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    border: 2px solid transparent;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.55);
+  }
+}
+
+@layer utilities {
+  .glow-bg {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.14;
+    pointer-events: none;
+    z-index: -1;
+    animation: floatBlobs 20s infinite alternate ease-in-out;
+  }
+
+  .bg-purple {
+    background-color: var(--blob-purple);
+    top: 5%;
+    left: 2%;
+  }
+
+  .bg-blue {
+    background-color: var(--blob-blue);
+    bottom: 10%;
+    right: 2%;
+    animation-delay: -5s;
+  }
+
+  .bg-pink {
+    background-color: var(--blob-pink);
+    top: 50%;
+    left: 45%;
+    width: 400px;
+    height: 400px;
+    opacity: 0.08;
+    animation-delay: -10s;
+  }
+}
+
+@keyframes floatBlobs {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(60px, 40px) scale(1.15); }
+}
+
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(0, 168, 132, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); }
+}
