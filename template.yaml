@@ -1,0 +1,244 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: WBOS v2 First Commit AWS Edition - Serverless Infrastructure
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.12
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref WBOSStoreTable
+        BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+        EVENT_BUS_NAME: !Ref WBOSEventBus
+
+  HttpApi:
+    CorsConfiguration:
+      AllowOrigins:
+        - "*"
+      AllowHeaders:
+        - "*"
+      AllowMethods:
+        - "*"
+
+Resources:
+  WBOSStoreTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "WBOS_Store"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+        - AttributeName: GSI2PK
+          AttributeType: S
+        - AttributeName: GSI2SK
+          AttributeType: S
+        - AttributeName: GSI3PK
+          AttributeType: S
+        - AttributeName: GSI3SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GSI2
+          KeySchema:
+            - AttributeName: GSI2PK
+              KeyType: HASH
+            - AttributeName: GSI2SK
+              KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        - IndexName: GSI3
+          KeySchema:
+            - AttributeName: GSI3PK
+              KeyType: HASH
+            - AttributeName: GSI3SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  IngressFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.ingress.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: !GetAtt WBOSEventBus.Arn
+      Events:
+        WebhookAPI:
+          Type: HttpApi
+          Properties:
+            Path: /webhook
+            Method: post
+
+  WBOSEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: wbos-events
+
+  WBOSEventsDLQ:
+    Type: AWS::SQS::Queue
+
+  InvoiceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "wbos-invoices-${AWS::AccountId}-${AWS::Region}"
+
+  InvoiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.invoice.lambda_handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref InvoiceBucket
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: !GetAtt WBOSEventBus.Arn
+      Environment:
+        Variables:
+          INVOICE_BUCKET: !Ref InvoiceBucket
+      Events:
+        OrderCreatedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.orders
+              detail-type:
+                - OrderCreated
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+
+  NotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.notification.lambda_handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: "*" # For MVP, would be restricted to Meta App Secret
+      Events:
+        InvoiceGeneratedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.invoice
+              detail-type:
+                - InvoiceGenerated
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+        OrderCreatedNotifyEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.orders
+              detail-type:
+                - OrderCreated
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+
+  DashboardFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.dashboard.lambda_handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:Query
+                - dynamodb:Scan
+              Resource: 
+                - !GetAtt WBOSStoreTable.Arn
+                - !Sub "${WBOSStoreTable.Arn}/index/*"
+      Events:
+        DashboardApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/{proxy+}
+            Method: any
+
+  DashboardEventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.dashboard_events.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
+      Events:
+        AllWBOSDomainEvents:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.orders
+                - wbos.invoice
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+
+Outputs:
+  WebhookApiUrl:
+    Description: "API Gateway endpoint URL for Prod environment"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook"
+  IngressFunctionArn:
+    Description: "Ingress Lambda Function ARN"
+    Value: !GetAtt IngressFunction.Arn

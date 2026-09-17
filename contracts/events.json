@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WBOS Event Contracts",
+  "type": "object",
+  "definitions": {
+    "BaseEvent": {
+      "type": "object",
+      "required": ["eventId", "eventType", "version", "tenantId", "timestamp", "source", "data"],
+      "properties": {
+        "eventId": { "type": "string", "format": "uuid" },
+        "eventType": { "type": "string" },
+        "version": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" },
+        "data": { "type": "object" }
+      }
+    },
+    "OrderCreated": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        {
+          "properties": {
+            "eventType": { "const": "OrderCreated" },
+            "source": { "const": "wbos.orders" },
+            "data": {
+              "type": "object",
+              "required": ["orderId", "customerId", "total", "items"],
+              "properties": {
+                "orderId": { "type": "string" },
+                "customerId": { "type": "string" },
+                "total": { "type": "number" },
+                "items": { "type": "array" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "InvoiceGenerated": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEvent" },
+        {
+          "properties": {
+            "eventType": { "const": "InvoiceGenerated" },
+            "source": { "const": "wbos.invoice" },
+            "data": {
+              "type": "object",
+              "required": ["orderId", "invoiceUrl"],
+              "properties": {
+                "orderId": { "type": "string" },
+                "invoiceUrl": { "type": "string", "format": "uri" }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

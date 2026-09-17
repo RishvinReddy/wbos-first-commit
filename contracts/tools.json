@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WBOS Bedrock Tool Registry",
+  "description": "Amazon Bedrock Foundation Model Tool Specifications for WBOS v2",
+  "tools": [
+    {
+      "name": "get_customer",
+      "description": "Lookup an existing customer profile by their international E.164 phone number.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Customer E.164 phone number, e.g. +919347761153"
+          }
+        },
+        "required": ["phone"]
+      }
+    },
+    {
+      "name": "create_customer",
+      "description": "Register a new customer profile with their phone number, full name, and delivery address.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Customer E.164 phone number"
+          },
+          "name": {
+            "type": "string",
+            "description": "Customer's full name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Customer delivery street address or landmark"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Optional GPS latitude if provided via WhatsApp location pin"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Optional GPS longitude if provided via WhatsApp location pin"
+          }
+        },
+        "required": ["phone", "name", "address"]
+      }
+    },
+    {
+      "name": "update_customer",
+      "description": "Update an existing customer's delivery address or profile information.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID (CUS_...)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Updated name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Updated delivery address"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Updated GPS latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Updated GPS longitude"
+          }
+        },
+        "required": ["customerId"]
+      }
+    },
+    {
+      "name": "search_products",
+      "description": "Search the live product catalog using keyword matching or category filtering.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search keywords, e.g. 'basmati rice', 'amul milk', 'fortune oil'"
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional product category filter (e.g. 'Staples', 'Dairy', 'Snacks')"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "description": "Maximum number of products to return"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "check_inventory",
+      "description": "Check current stock availability, units, and price for a list of specific product IDs.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "productIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of Product IDs (PROD_...)"
+          }
+        },
+        "required": ["productIds"]
+      }
+    },
+    {
+      "name": "get_low_stock_products",
+      "description": "Retrieve all inventory items that have fallen below their configured reorder threshold.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "thresholdOverride": {
+            "type": "integer",
+            "description": "Optional custom threshold value to filter by instead of product default"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_order",
+      "description": "Create a new customer order. Validates stock, calculates 5% GST and delivery fees, reserves inventory, and transitions order to PENDING.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "description": "ID of the customer placing the order"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of items requested",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": { "type": "string", "description": "Product SKU ID" },
+                "quantity": { "type": "number", "description": "Quantity to order" },
+                "unit": { "type": "string", "description": "Packaging unit (kg, packet, L, pcs)" }
+              },
+              "required": ["productId", "quantity"]
+            }
+          },
+          "deliveryAddress": {
+            "type": "string",
+            "description": "Delivery address for this specific order"
+          }
+        },
+        "required": ["customerId", "items"]
+      }
+    },
+    {
+      "name": "get_order",
+      "description": "Fetch complete status, line items, breakdown, and rider info for a specific order ID.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Order ID (ORD_...)"
+          }
+        },
+        "required": ["orderId"]
+      }
+    },
+    {
+      "name": "get_customer_orders",
+      "description": "Fetch the order history and current active orders for a customer.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "description": "Customer ID"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 5,
+            "description": "Number of recent orders to fetch"
+          }
+        },
+        "required": ["customerId"]
+      }
+    },
+    {
+      "name": "cancel_order",
+      "description": "Cancel an order if it is in DRAFT, PENDING, or CONFIRMED state. Restores reserved inventory.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Order ID to cancel"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for cancellation"
+          }
+        },
+        "required": ["orderId", "reason"]
+      }
+    },
+    {
+      "name": "get_daily_sales",
+      "description": "Business Owner Tool: Aggregate gross revenue, order count, and average order value for a specific calendar date.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "ISO date string (YYYY-MM-DD). Defaults to today if omitted."
+          }
+        }
+      }
+    },
+    {
+      "name": "get_pending_orders",
+      "description": "Business Owner Tool: List all orders currently awaiting review, packing, or dispatch.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "CONFIRMED", "PREPARING", "READY"],
+            "description": "Filter by specific operational status"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_sales_summary",
+      "description": "Business Owner Tool: Generate multi-day sales performance metrics and top-selling product breakdown.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": ["today", "yesterday", "last_7_days", "month_to_date"],
+            "default": "today",
+            "description": "Reporting window"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_order_status",
+      "description": "Operations Tool: Advance an order through its formal state machine (e.g. CONFIRMED -> PREPARING -> READY).",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Order ID"
+          },
+          "newStatus": {
+            "type": "string",
+            "enum": ["CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"],
+            "description": "Next permitted status"
+          },
+          "packerName": {
+            "type": "string",
+            "description": "Staff member name when transitioning to PREPARING/READY"
+          }
+        },
+        "required": ["orderId", "newStatus"]
+      }
+    },
+    {
+      "name": "assign_delivery",
+      "description": "Operations Tool: Assign a delivery rider to a READY order, generating a live tracking link.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Order ID"
+          },
+          "driverName": {
+            "type": "string",
+            "description": "Rider's full name"
+          },
+          "driverPhone": {
+            "type": "string",
+            "description": "Rider's telephone number"
+          }
+        },
+        "required": ["orderId", "driverName"]
+      }
+    }
+  ]
+}

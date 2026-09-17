@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wbos.dev/schemas/product.json",
+  "title": "Product",
+  "description": "WBOS Product Catalog Entity Schema",
+  "type": "object",
+  "required": ["productId", "tenantId", "name", "category", "unit", "price", "stock", "status"],
+  "properties": {
+    "productId": {
+      "type": "string",
+      "pattern": "^PROD_[0-9A-Z]{4,}$",
+      "description": "Unique Product SKU Identifier"
+    },
+    "tenantId": {
+      "type": "string",
+      "pattern": "^TENANT_[0-9A-Za-z_-]+$",
+      "description": "Tenant / Enterprise identifier"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 150,
+      "description": "Product display title (e.g. Basmati Rice (Rozana 1kg))"
+    },
+    "category": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 60,
+      "description": "Product Category (e.g. Staples, Dairy, Snacks, Beverages)"
+    },
+    "unit": {
+      "type": "string",
+      "enum": ["kg", "g", "packet", "L", "ml", "pcs", "bottle", "box", "tub", "pack"],
+      "description": "Packaging unit of measurement"
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0.01,
+      "description": "Base unit selling price in INR"
+    },
+    "stock": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Currently available inventory count in packaging units"
+    },
+    "lowStockThreshold": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 10,
+      "description": "Threshold at which an automated LowStockDetected event fires"
+    },
+    "taxRate": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 0.28,
+      "default": 0.05,
+      "description": "Applicable GST tax percentage slab (e.g. 0.05 for 5%)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "DISCONTINUED", "OUT_OF_STOCK"],
+      "default": "ACTIVE"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

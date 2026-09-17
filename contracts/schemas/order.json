@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wbos.dev/schemas/order.json",
+  "title": "Order",
+  "description": "WBOS Order & Line Item Entity Schema",
+  "type": "object",
+  "required": [
+    "orderId",
+    "tenantId",
+    "customerId",
+    "status",
+    "items",
+    "subtotal",
+    "tax",
+    "deliveryFee",
+    "total",
+    "createdAt"
+  ],
+  "properties": {
+    "orderId": {
+      "type": "string",
+      "pattern": "^ORD_[0-9A-Z]{6,}$",
+      "description": "Unique Order ID (e.g. ORD_01J8R9X...)"
+    },
+    "tenantId": {
+      "type": "string",
+      "pattern": "^TENANT_[0-9A-Za-z_-]+$",
+      "description": "Tenant / Enterprise identifier"
+    },
+    "customerId": {
+      "type": "string",
+      "pattern": "^CUS_[0-9A-Z]{12,}$",
+      "description": "Foreign key reference to Customer"
+    },
+    "customerPhone": {
+      "type": "string",
+      "pattern": "^\\+[1-9]\\d{1,14}$"
+    },
+    "customerName": {
+      "type": "string"
+    },
+    "deliveryAddress": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string" },
+        "latitude": { "type": ["number", "null"] },
+        "longitude": { "type": ["number", "null"] }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "PENDING",
+        "CONFIRMED",
+        "PREPARING",
+        "READY",
+        "OUT_FOR_DELIVERY",
+        "DELIVERED",
+        "CANCELLED"
+      ],
+      "default": "DRAFT"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["productId", "name", "quantity", "unit", "unitPrice", "lineTotal"],
+        "properties": {
+          "productId": { "type": "string" },
+          "name": { "type": "string" },
+          "quantity": { "type": "number", "minimum": 0.1 },
+          "unit": { "type": "string" },
+          "unitPrice": { "type": "number", "minimum": 0.01 },
+          "lineTotal": { "type": "number", "minimum": 0.01 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "subtotal": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "tax": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "deliveryFee": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "discount": {
+      "type": "number",
+      "minimum": 0.0,
+      "default": 0.0
+    },
+    "total": {
+      "type": "number",
+      "minimum": 0.0
+    },
+    "invoiceUrl": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "S3 Pre-signed or Public URL to generated PDF tax invoice"
+    },
+    "packerName": {
+      "type": ["string", "null"]
+    },
+    "driverName": {
+      "type": ["string", "null"]
+    },
+    "driverPhone": {
+      "type": ["string", "null"]
+    },
+    "cancellationReason": {
+      "type": ["string", "null"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confirmedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "deliveredAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

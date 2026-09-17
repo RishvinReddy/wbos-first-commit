@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wbos.dev/schemas/customer.json",
+  "title": "Customer",
+  "description": "WBOS Customer Entity Schema",
+  "type": "object",
+  "required": ["customerId", "tenantId", "phone", "name", "status", "createdAt"],
+  "properties": {
+    "customerId": {
+      "type": "string",
+      "pattern": "^CUS_[0-9A-Z]{12,}$",
+      "description": "Unique Customer ID (e.g. CUS_01J8R9X2B0Z...)"
+    },
+    "tenantId": {
+      "type": "string",
+      "pattern": "^TENANT_[0-9A-Za-z_-]+$",
+      "description": "Tenant / Enterprise identifier"
+    },
+    "phone": {
+      "type": "string",
+      "pattern": "^\\+[1-9]\\d{1,14}$",
+      "description": "E.164 formatted international telephone number (e.g. +919347761153)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Customer display name or profile name"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Street address or landmark description"
+        },
+        "latitude": {
+          "type": ["number", "null"],
+          "minimum": -90.0,
+          "maximum": 90.0,
+          "description": "GPS Latitude coordinate"
+        },
+        "longitude": {
+          "type": ["number", "null"],
+          "minimum": -180.0,
+          "maximum": 180.0,
+          "description": "GPS Longitude coordinate"
+        }
+      },
+      "required": ["text"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "SUSPENDED", "ARCHIVED"],
+      "default": "ACTIVE"
+    },
+    "isTakeover": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when human operator has taken over the chat thread"
+    },
+    "lastInteractionAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

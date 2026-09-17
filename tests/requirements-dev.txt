@@ -1,0 +1,4 @@
+pytest
+moto[dynamodb,bedrock]
+boto3
+pydantic

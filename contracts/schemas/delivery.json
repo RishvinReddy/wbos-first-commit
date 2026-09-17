@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wbos.dev/schemas/delivery.json",
+  "title": "Delivery",
+  "description": "WBOS Delivery Dispatch & Tracking Entity Schema",
+  "type": "object",
+  "required": ["deliveryId", "orderId", "tenantId", "status", "assignedAt"],
+  "properties": {
+    "deliveryId": {
+      "type": "string",
+      "pattern": "^DEL_[0-9A-Z]{6,}$",
+      "description": "Unique Delivery dispatch ID"
+    },
+    "orderId": {
+      "type": "string",
+      "pattern": "^ORD_[0-9A-Z]{6,}$"
+    },
+    "tenantId": {
+      "type": "string",
+      "pattern": "^TENANT_[0-9A-Za-z_-]+$"
+    },
+    "driverName": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "driverPhone": {
+      "type": "string",
+      "pattern": "^\\+[1-9]\\d{1,14}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ASSIGNED", "DISPATCHED", "EN_ROUTE", "DELIVERED", "FAILED"],
+      "default": "ASSIGNED"
+    },
+    "trackingUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "assignedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dispatchedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "deliveredAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "currentLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
