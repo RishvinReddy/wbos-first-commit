@@ -2,24 +2,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, CheckCircle, AlertTriangle, Truck, MapPin, Phone, User, Check, Clock, Box, Activity } from "lucide-react";
 import Link from "next/link";
+import { fetchOrders } from "@/lib/api";
 
-export default function OrdersPage() {
-  const pipeline = {
-    new: [
-      { id: "#1044", customer: "Neha Verma", time: "5m ago", items: "5kg Atta, 1L Milk", total: 320 },
-      { id: "#1045", customer: "Sanjay Kumar", time: "2m ago", items: "Bread, Eggs, Butter", total: 180 },
-    ],
-    confirmed: [
-      { id: "#1043", customer: "Priya Reddy", time: "15m ago", items: "500g Sugar, Tea", total: 120 },
-    ],
-    preparing: [
-      { id: "#1042", customer: "Rahul Sharma", time: "30m ago", items: "2kg Basmati Rice, 1L Oil", total: 540 },
-    ],
-    delivery: [
-      { id: "#1041", customer: "Arjun Kumar", time: "45m ago", items: "Weekly Groceries", total: 1450 },
-      { id: "#1039", customer: "Vikas Singh", time: "1h ago", items: "Snacks & Drinks", total: 450 },
-    ]
+export default async function OrdersPage() {
+  let pipeline = {
+    new: [] as any[],
+    confirmed: [] as any[],
+    preparing: [] as any[],
+    delivery: [] as any[]
   };
+  
+  let error = null;
+
+  try {
+    const data = await fetchOrders();
+    
+    // Group orders based on status (assuming status might be added by backend, or fallback to new)
+    data.forEach(order => {
+      const status = (order.status || "PENDING").toUpperCase();
+      const orderObj = {
+        id: order.orderId,
+        customer: order.customer,
+        time: new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        items: `${order.itemCount} items`,
+        total: order.total
+      };
+      
+      if (status === "PENDING") pipeline.new.push(orderObj);
+      else if (status === "CONFIRMED") pipeline.confirmed.push(orderObj);
+      else if (status === "PREPARING") pipeline.preparing.push(orderObj);
+      else if (status === "READY" || status === "DELIVERY") pipeline.delivery.push(orderObj);
+      else pipeline.new.push(orderObj);
+    });
+  } catch (err: any) {
+    error = err.message || "Failed to fetch live orders data";
+  }
 
   const OrderCard = ({ order, status }: { order: any, status: string }) => (
     <div className="bg-white/80 border border-white p-3 rounded-xl shadow-sm mb-3 cursor-pointer hover:shadow-md transition-shadow group">
@@ -55,7 +72,10 @@ export default function OrdersPage() {
     <div className="h-[calc(100vh-8rem)] flex flex-col gap-6 max-w-[1400px] mx-auto">
       <div className="flex justify-between items-end">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold tracking-tight">Order Operations</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+            Order Operations
+            <Badge className="bg-wa-green/20 text-wa-green border-wa-green/30 px-2 py-0.5 text-xs font-bold">LIVE DATA</Badge>
+          </h2>
           <p className="text-text-muted font-medium">Pipeline execution & fulfillment</p>
         </div>
         <div className="flex items-center gap-2">
@@ -63,6 +83,12 @@ export default function OrdersPage() {
           <Badge className="bg-accent-indigo text-white hover:bg-indigo-600 cursor-pointer text-xs font-bold px-3 py-1">AI Routing: ON</Badge>
         </div>
       </div>
+      
+      {error && (
+        <div className="p-4 bg-accent-red/10 border border-accent-red/30 rounded-xl text-accent-red text-sm font-bold flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" /> {error}
+        </div>
+      )}
 
       {/* Kanban Board */}
       <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
@@ -78,6 +104,7 @@ export default function OrdersPage() {
           </div>
           <div className="flex-1 p-3 overflow-y-auto">
             {pipeline.new.map(order => <OrderCard key={order.id} order={order} status="new" />)}
+            {pipeline.new.length === 0 && !error && <div className="text-center text-xs text-text-muted mt-4">No new orders</div>}
           </div>
         </div>
 
@@ -92,6 +119,7 @@ export default function OrdersPage() {
           </div>
           <div className="flex-1 p-3 overflow-y-auto">
             {pipeline.confirmed.map(order => <OrderCard key={order.id} order={order} status="confirmed" />)}
+            {pipeline.confirmed.length === 0 && !error && <div className="text-center text-xs text-text-muted mt-4">No confirmed orders</div>}
           </div>
         </div>
 
@@ -106,6 +134,7 @@ export default function OrdersPage() {
           </div>
           <div className="flex-1 p-3 overflow-y-auto">
             {pipeline.preparing.map(order => <OrderCard key={order.id} order={order} status="preparing" />)}
+            {pipeline.preparing.length === 0 && !error && <div className="text-center text-xs text-text-muted mt-4">No orders preparing</div>}
           </div>
         </div>
 
@@ -120,6 +149,7 @@ export default function OrdersPage() {
           </Link>
           <div className="flex-1 p-3 overflow-y-auto">
             {pipeline.delivery.map(order => <OrderCard key={order.id} order={order} status="delivery" />)}
+            {pipeline.delivery.length === 0 && !error && <div className="text-center text-xs text-text-muted mt-4">No orders for delivery</div>}
           </div>
         </div>
 

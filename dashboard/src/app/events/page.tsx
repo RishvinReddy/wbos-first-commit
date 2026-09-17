@@ -1,16 +1,78 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Activity, ArrowDown, Database, FileText, Bell, LayoutDashboard, Search, Filter, Box } from "lucide-react";
+import { Activity, ArrowDown, Database, FileText, Bell, LayoutDashboard, Search, Filter, Box, AlertTriangle, HelpCircle } from "lucide-react";
+import { fetchEvents } from "@/lib/api";
 
-export default function EventsPage() {
-  const events = [
-    { id: "evt_9a8b", type: "DashboardEvent", source: "System", detail: "Metrics Updated", time: "Just now", status: "Processed", icon: LayoutDashboard, color: "text-accent-cyan", bg: "bg-accent-cyan/10" },
-    { id: "evt_9a8c", type: "NotificationRequested", source: "EventBridge", detail: "Sent SMS to +91 98765...", time: "2 mins ago", status: "Delivered", icon: Bell, color: "text-accent-amber", bg: "bg-accent-amber/10" },
-    { id: "evt_9a8d", type: "InvoiceGenerated", source: "Billing", detail: "INV-1043.pdf stored in S3", time: "2 mins ago", status: "Success", icon: FileText, color: "text-accent-indigo", bg: "bg-accent-indigo/10" },
-    { id: "evt_9a8e", type: "OrderCreated", source: "WhatsApp", detail: "Order #1043 from Priya", time: "2 mins ago", status: "Published", icon: Box, color: "text-wa-green", bg: "bg-wa-green/10" },
-    { id: "evt_8f7a", type: "InventoryUpdated", source: "System", detail: "Basmati Rice stock -2", time: "15 mins ago", status: "Processed", icon: Database, color: "text-text-secondary", bg: "bg-gray-100" },
-    { id: "evt_8f7b", type: "OrderCreated", source: "WhatsApp", detail: "Order #1042 from Rahul", time: "15 mins ago", status: "Published", icon: Box, color: "text-wa-green", bg: "bg-wa-green/10" },
-  ];
+export default async function EventsPage() {
+  let events: any[] = [];
+  let error = null;
+
+  try {
+    const data = await fetchEvents();
+    
+    events = data.map((evt) => {
+      // Determine styling based on event type
+      let icon = HelpCircle;
+      let color = "text-text-secondary";
+      let bg = "bg-gray-100";
+      
+      switch (evt.type) {
+        case "OrderCreated":
+          icon = Box;
+          color = "text-wa-green";
+          bg = "bg-wa-green/10";
+          break;
+        case "DashboardEvent":
+          icon = LayoutDashboard;
+          color = "text-accent-cyan";
+          bg = "bg-accent-cyan/10";
+          break;
+        case "NotificationRequested":
+          icon = Bell;
+          color = "text-accent-amber";
+          bg = "bg-accent-amber/10";
+          break;
+        case "InvoiceGenerated":
+          icon = FileText;
+          color = "text-accent-indigo";
+          bg = "bg-accent-indigo/10";
+          break;
+        case "InventoryUpdated":
+          icon = Database;
+          color = "text-text-secondary";
+          bg = "bg-gray-100";
+          break;
+        default:
+          icon = Activity;
+          color = "text-text-primary";
+          bg = "bg-text-primary/10";
+      }
+      
+      // Determine a detail string from data
+      let detail = JSON.stringify(evt.data).slice(0, 50) + "...";
+      if (evt.type === "OrderCreated" && evt.data?.orderId) {
+        detail = `Order ${evt.data.orderId} created`;
+      } else if (evt.type === "InvoiceGenerated" && evt.data?.s3_key) {
+        detail = `Invoice stored: ${evt.data.s3_key}`;
+      } else if (evt.type === "DashboardEvent" && evt.data?.messageId) {
+        detail = `Processed message: ${evt.data.messageId}`;
+      }
+
+      return {
+        id: evt.eventId,
+        type: evt.type,
+        source: evt.data?.source || "EventBridge",
+        detail: detail,
+        time: new Date(evt.timestamp).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}),
+        status: "Processed",
+        icon: icon,
+        color: color,
+        bg: bg
+      };
+    });
+  } catch (err: any) {
+    error = err.message || "Failed to fetch live events data";
+  }
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col gap-6 max-w-7xl mx-auto overflow-y-auto pr-2 pb-6">
@@ -18,9 +80,16 @@ export default function EventsPage() {
         <h2 className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
           <Activity className="h-6 w-6 text-accent-indigo" />
           Event Pipeline
+          <Badge className="bg-wa-green/20 text-wa-green border-wa-green/30 px-2 py-0.5 text-xs font-bold ml-2">LIVE DATA</Badge>
         </h2>
         <p className="text-text-muted font-medium">Asynchronous event routing and system observability</p>
       </div>
+      
+      {error && (
+        <div className="p-4 bg-accent-red/10 border border-accent-red/30 rounded-xl text-accent-red text-sm font-bold flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" /> {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -78,12 +147,6 @@ export default function EventsPage() {
                 </div>
               </div>
 
-              <div className="mt-8 p-3 bg-text-primary/5 rounded-lg border border-black/5">
-                <p className="text-xs text-text-secondary font-medium leading-relaxed">
-                  <strong>Note:</strong> In UI-4, this page will stream live AWS EventBridge activity. Currently displaying simulated local events.
-                </p>
-              </div>
-
             </CardContent>
           </Card>
         </div>
@@ -110,6 +173,9 @@ export default function EventsPage() {
             
             <div className="flex-1 overflow-y-auto p-4 font-jetbrains text-sm">
               <div className="space-y-3 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-px before:bg-gradient-to-b before:from-border-color before:via-border-color before:to-transparent">
+                {events.length === 0 && !error && (
+                  <div className="text-center py-8 text-text-muted font-sans font-medium">No live events captured yet. Send a message to start the pipeline!</div>
+                )}
                 {events.map((event) => (
                   <div key={event.id} className="relative flex items-start gap-4 group">
                     <div className={`mt-0.5 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white ${event.bg} ${event.color} shadow-sm shrink-0 z-10 transition-transform group-hover:scale-110`}>

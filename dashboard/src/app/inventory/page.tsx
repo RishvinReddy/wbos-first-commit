@@ -2,22 +2,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package, AlertTriangle, ArrowRight, Zap, RefreshCw, BarChart2, Filter } from "lucide-react";
 import Link from "next/link";
+import { fetchInventory } from "@/lib/api";
 
-export default function InventoryPage() {
-  const inventory = [
-    { id: "SKU-101", name: "Basmati Rice 1kg", category: "Grains", stock: 8, maxStock: 50, price: 120, status: "low", velocity: "High" },
-    { id: "SKU-102", name: "Cooking Oil 1L", category: "Oils", stock: 6, maxStock: 40, price: 180, status: "low", velocity: "High" },
-    { id: "SKU-103", name: "Sugar 1kg", category: "Groceries", stock: 45, maxStock: 60, price: 45, status: "healthy", velocity: "Medium" },
-    { id: "SKU-104", name: "Aashirvaad Atta 5kg", category: "Flour", stock: 12, maxStock: 30, price: 210, status: "warning", velocity: "High" },
-    { id: "SKU-105", name: "Tata Salt 1kg", category: "Groceries", stock: 85, maxStock: 100, price: 25, status: "healthy", velocity: "Medium" },
-    { id: "SKU-106", name: "Toor Dal 1kg", category: "Pulses", stock: 2, maxStock: 25, price: 160, status: "critical", velocity: "Low" },
-  ];
+export default async function InventoryPage() {
+  let inventory: any[] = [];
+  let error = null;
+
+  try {
+    const data = await fetchInventory();
+    inventory = data.map(item => ({
+      id: item.productId,
+      name: item.name,
+      category: "General", // Placeholder until category is added to DB
+      stock: item.stock,
+      maxStock: Math.max(item.stock * 2, 50), // Dynamic maxStock for demo visualization
+      price: item.price,
+      status: item.stock < 10 ? "low" : (item.stock < 20 ? "warning" : "healthy"),
+      velocity: item.stock < 10 ? "High" : "Medium"
+    }));
+  } catch (err: any) {
+    error = err.message || "Failed to fetch live inventory data";
+  }
+
+  const lowStockCount = inventory.filter(i => i.status === 'low' || i.status === 'critical').length;
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col gap-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-end">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-extrabold tracking-tight">Inventory Intelligence</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+            Inventory Intelligence
+            <Badge className="bg-wa-green/20 text-wa-green border-wa-green/30 px-2 py-0.5 text-xs font-bold">LIVE DATA</Badge>
+          </h2>
           <p className="text-text-muted font-medium">Real-time stock tracking and AI reordering</p>
         </div>
         <div className="flex items-center gap-3">
@@ -34,6 +50,12 @@ export default function InventoryPage() {
           </button>
         </div>
       </div>
+      
+      {error && (
+        <div className="p-4 bg-accent-red/10 border border-accent-red/30 rounded-xl text-accent-red text-sm font-bold flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" /> {error}
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-4 gap-4">
@@ -41,7 +63,7 @@ export default function InventoryPage() {
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <div className="text-xs font-bold uppercase text-text-muted mb-1">Total SKUs</div>
-              <div className="text-2xl font-bold">248</div>
+              <div className="text-2xl font-bold">{inventory.length}</div>
             </div>
             <div className="h-10 w-10 rounded-full bg-wa-green/10 text-wa-green flex items-center justify-center">
               <Package className="h-5 w-5" />
@@ -52,7 +74,7 @@ export default function InventoryPage() {
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <div className="text-xs font-bold uppercase text-text-muted mb-1">Low Stock</div>
-              <div className="text-2xl font-bold text-accent-red">14</div>
+              <div className="text-2xl font-bold text-accent-red">{lowStockCount}</div>
             </div>
             <div className="h-10 w-10 rounded-full bg-accent-red/10 text-accent-red flex items-center justify-center">
               <AlertTriangle className="h-5 w-5" />
@@ -64,7 +86,7 @@ export default function InventoryPage() {
             <CardContent className="p-5 flex items-center justify-between h-full hover:bg-white/40 transition-colors">
               <div>
                 <div className="text-xs font-bold uppercase text-text-muted mb-1 group-hover:text-accent-indigo transition-colors">AI Reorders</div>
-                <div className="text-2xl font-bold text-accent-indigo group-hover:scale-105 transition-transform origin-left">3</div>
+                <div className="text-2xl font-bold text-accent-indigo group-hover:scale-105 transition-transform origin-left">Active</div>
               </div>
               <div className="h-10 w-10 rounded-full bg-accent-indigo/10 text-accent-indigo flex items-center justify-center group-hover:bg-accent-indigo group-hover:text-white transition-colors">
                 <Zap className="h-5 w-5" />
@@ -97,6 +119,12 @@ export default function InventoryPage() {
             <div>Velocity</div>
             <div className="text-right">Action</div>
           </div>
+          
+          {inventory.length === 0 && !error && (
+            <div className="text-center py-10 text-text-muted font-medium">
+              No products found in inventory.
+            </div>
+          )}
           
           <div className="space-y-3">
             {inventory.map((item) => {
