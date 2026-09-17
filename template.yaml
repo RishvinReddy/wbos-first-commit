@@ -67,8 +67,8 @@ Resources:
               KeyType: HASH
             - AttributeName: GSI2SK
               KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
+          Projection:
+            ProjectionType: ALL
         - IndexName: GSI3
           KeySchema:
             - AttributeName: GSI3PK
