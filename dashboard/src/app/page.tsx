@@ -1,4 +1,7 @@
-import { IndianRupee, ShoppingCart, TrendingUp, Truck, ArrowRight, AlertTriangle, MessageSquare, Zap } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { IndianRupee, ShoppingCart, TrendingUp, Truck, ArrowRight, AlertTriangle, MessageSquare, Zap, Loader2 } from "lucide-react";
 import { fetchMetrics, fetchOrders, fetchInventory } from "@/lib/api";
 import Link from "next/link";
 
@@ -40,36 +43,38 @@ function StatusBadge({ color, label }: { color: string; label: string }) {
 
 // ── Page ─────────────────────────────────────────────────────────────────
 
-export default async function ExecutiveCockpit() {
-  let metrics = { total_sales: 0, order_count: 0, average_order_value: 0 };
-  let pipeline: any[] = [];
-  let inventory: any[] = [];
-  let error: string | null = null;
+export default function ExecutiveCockpit() {
+  const [metrics, setMetrics] = useState({ total_sales: 0, order_count: 0, average_order_value: 0 });
+  const [pipeline, setPipeline] = useState<any[]>([]);
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const [metricsData, ordersData, inventoryData] = await Promise.all([
+  useEffect(() => {
+    Promise.all([
       fetchMetrics(),
       fetchOrders(),
       fetchInventory().catch(() => [])
-    ]);
-
-    metrics = {
-      total_sales: metricsData.total_sales ?? 0,
-      order_count: metricsData.order_count ?? 0,
-      average_order_value: metricsData.average_order_value ?? 0
-    };
-
-    pipeline = ordersData.slice(0, 4);
-    inventory = inventoryData.map((item: any) => ({
-      name: item.name,
-      stock: item.stock,
-      price: item.price,
-      status: item.stock < 10 ? "low" : item.stock < 20 ? "warning" : "healthy",
-      maxStock: Math.max(item.stock * 2, 50)
-    }));
-  } catch (err: any) {
-    error = err.message ?? "Failed to load live AWS data";
-  }
+    ]).then(([metricsData, ordersData, inventoryData]) => {
+      setMetrics({
+        total_sales: metricsData.total_sales ?? 0,
+        order_count: metricsData.order_count ?? 0,
+        average_order_value: metricsData.average_order_value ?? 0
+      });
+      setPipeline(ordersData.slice(0, 4));
+      setInventory(inventoryData.map((item: any) => ({
+        name: item.name,
+        stock: item.stock,
+        price: item.price,
+        status: item.stock < 10 ? "low" : item.stock < 20 ? "warning" : "healthy",
+        maxStock: Math.max(item.stock * 2, 50)
+      })));
+      setLoading(false);
+    }).catch(err => {
+      setError(err.message ?? "Failed to load live AWS data");
+      setLoading(false);
+    });
+  }, []);
 
   const lowStock = inventory.filter(i => i.status === "low");
   const needsAttention = lowStock.length > 0;
@@ -136,7 +141,7 @@ export default async function ExecutiveCockpit() {
               <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>Revenue</div>
               <div className="text-5xl font-extrabold leading-none mb-1 flex items-start" style={{ color: 'white' }}>
                 <span className="text-2xl font-bold mt-2 mr-1" style={{ color: 'var(--wbos-green)' }}>₹</span>
-                {metrics.total_sales.toLocaleString()}
+                {loading ? <Loader2 className="animate-spin h-8 w-8 mt-1 opacity-50" /> : metrics.total_sales.toLocaleString()}
               </div>
               <div className="text-xs font-medium mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Live revenue</div>
             </div>
@@ -145,7 +150,7 @@ export default async function ExecutiveCockpit() {
             <div className="px-6 py-6">
               <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>Orders</div>
               <div className="text-5xl font-extrabold leading-none mb-1" style={{ color: 'white' }}>
-                {metrics.order_count}
+                {loading ? <Loader2 className="animate-spin h-8 w-8 mt-1 opacity-50" /> : metrics.order_count}
               </div>
               <div className="text-xs font-medium mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Processed today</div>
             </div>
@@ -155,7 +160,7 @@ export default async function ExecutiveCockpit() {
               <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>Avg Order</div>
               <div className="text-5xl font-extrabold leading-none mb-1 flex items-start" style={{ color: 'white' }}>
                 <span className="text-2xl font-bold mt-2 mr-1" style={{ color: 'var(--wbos-muted)' }}>₹</span>
-                {metrics.average_order_value}
+                {loading ? <Loader2 className="animate-spin h-8 w-8 mt-1 opacity-50" /> : metrics.average_order_value}
               </div>
               <div className="text-xs font-medium mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Per order</div>
             </div>
@@ -208,7 +213,14 @@ export default async function ExecutiveCockpit() {
               </div>
 
               <div className="p-4 space-y-3">
-                {pipeline.length === 0 && !error && (
+                {loading && (
+                  <div className="text-center py-10 flex flex-col items-center justify-center gap-2" style={{ color: 'var(--wbos-muted)' }}>
+                    <Loader2 className="animate-spin h-5 w-5 opacity-50" />
+                    <span className="text-xs font-medium">Loading live pipeline...</span>
+                  </div>
+                )}
+                
+                {!loading && pipeline.length === 0 && !error && (
                   <div className="text-center py-10 text-sm font-medium"
                     style={{ color: 'var(--wbos-muted)', border: '1px dashed var(--wbos-border)', borderRadius: '8px' }}>
                     No active orders. Send a message to start the pipeline.
@@ -350,7 +362,13 @@ export default async function ExecutiveCockpit() {
             </div>
 
             <div className="divide-y" style={{ borderColor: 'var(--wbos-border)' }}>
-              {inventory.length === 0 && !error && (
+              {loading && (
+                <div className="text-center py-8 flex justify-center items-center gap-2 text-sm" style={{ color: 'var(--wbos-muted)' }}>
+                  <Loader2 className="animate-spin h-4 w-4 opacity-50" />
+                  Loading inventory...
+                </div>
+              )}
+              {!loading && inventory.length === 0 && !error && (
                 <div className="text-center py-8 text-sm" style={{ color: 'var(--wbos-muted)' }}>
                   No inventory data available.
                 </div>

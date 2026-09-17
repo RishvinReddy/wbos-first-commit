@@ -1,4 +1,7 @@
-import { Package, AlertTriangle, ArrowRight } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Package, AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { fetchInventory } from "@/lib/api";
 
@@ -14,23 +17,27 @@ function Section({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
-export default async function InventoryPage() {
-  let inventory: any[] = [];
-  let error = null;
+export default function InventoryPage() {
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const data = await fetchInventory();
-    inventory = data.map((item: any) => ({
-      id: item.productId,
-      name: item.name,
-      stock: item.stock,
-      price: item.price,
-      maxStock: Math.max(item.stock * 2, 50),
-      status: item.stock < 10 ? "low" : item.stock < 20 ? "warning" : "healthy",
-    }));
-  } catch (err: any) {
-    error = err.message || "Failed to fetch inventory";
-  }
+  useEffect(() => {
+    fetchInventory().then((data) => {
+      setInventory(data.map((item: any) => ({
+        id: item.productId,
+        name: item.name,
+        stock: item.stock,
+        price: item.price,
+        maxStock: Math.max(item.stock * 2, 50),
+        status: item.stock < 10 ? "low" : item.stock < 20 ? "warning" : "healthy",
+      })));
+      setLoading(false);
+    }).catch(err => {
+      setError(err.message || "Failed to fetch inventory");
+      setLoading(false);
+    });
+  }, []);
 
   const totalSkus = inventory.length;
   const lowCount = inventory.filter(i => i.status === 'low').length;
@@ -74,7 +81,7 @@ export default async function InventoryPage() {
             style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
             <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--wbos-muted)' }}>{kpi.label}</div>
             <div className="text-3xl font-extrabold" style={{ color: kpi.value > 0 && kpi.label === "Low Stock" ? 'var(--danger)' : 'var(--wbos-ink)' }}>
-              {kpi.value}
+              {loading ? <Loader2 className="animate-spin h-6 w-6 mt-1 opacity-50" /> : kpi.value}
             </div>
           </div>
         ))}
@@ -94,7 +101,13 @@ export default async function InventoryPage() {
             <div className="text-right">Action</div>
           </div>
 
-          {inventory.length === 0 && !error && (
+          {loading && (
+            <div className="text-center py-12 flex justify-center text-sm" style={{ color: 'var(--wbos-muted)' }}>
+              <Loader2 className="animate-spin h-6 w-6 opacity-50" />
+            </div>
+          )}
+
+          {!loading && inventory.length === 0 && !error && (
             <div className="text-center py-12 text-sm" style={{ color: 'var(--wbos-muted)' }}>
               No inventory data.
             </div>

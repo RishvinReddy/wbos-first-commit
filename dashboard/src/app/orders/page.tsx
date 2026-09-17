@@ -1,4 +1,7 @@
-import { ShoppingCart, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { ShoppingCart, AlertTriangle, Clock, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { fetchOrders } from "@/lib/api";
 
@@ -30,31 +33,37 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-export default async function OrdersPage() {
-  let pipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] };
-  let allOrders: any[] = [];
-  let error = null;
+export default function OrdersPage() {
+  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] });
+  const [allOrders, setAllOrders] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const data = await fetchOrders();
-    allOrders = data;
-    data.forEach((order: any) => {
-      const status = (order.status || "PENDING").toUpperCase();
-      const obj = {
-        id: order.orderId,
-        customer: order.customer,
-        time: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        items: order.itemCount,
-        total: order.total
-      };
-      if (status === "CONFIRMED") pipeline.confirmed.push(obj);
-      else if (status === "PREPARING") pipeline.preparing.push(obj);
-      else if (["READY", "DELIVERY"].includes(status)) pipeline.delivery.push(obj);
-      else pipeline.new.push(obj);
+  useEffect(() => {
+    fetchOrders().then((data) => {
+      setAllOrders(data);
+      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] };
+      data.forEach((order: any) => {
+        const status = (order.status || "PENDING").toUpperCase();
+        const obj = {
+          id: order.orderId,
+          customer: order.customer,
+          time: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          items: order.itemCount,
+          total: order.total
+        };
+        if (status === "CONFIRMED") newPipeline.confirmed.push(obj);
+        else if (status === "PREPARING") newPipeline.preparing.push(obj);
+        else if (["READY", "DELIVERY"].includes(status)) newPipeline.delivery.push(obj);
+        else newPipeline.new.push(obj);
+      });
+      setPipeline(newPipeline);
+      setLoading(false);
+    }).catch(err => {
+      setError(err.message || "Failed to fetch orders");
+      setLoading(false);
     });
-  } catch (err: any) {
-    error = err.message || "Failed to fetch orders";
-  }
+  }, []);
 
   const columns = [
     { key: "new", label: "New", count: pipeline.new.length, color: 'var(--warning)', bg: 'var(--warning-soft)', orders: pipeline.new, status: "PENDING" },
@@ -114,7 +123,12 @@ export default async function OrdersPage() {
 
               {/* Orders */}
               <div className="flex-1 p-3 space-y-2 overflow-y-auto">
-                {col.orders.length === 0 && !error && (
+                {loading && (
+                  <div className="text-center py-8 flex justify-center text-sm" style={{ color: 'var(--wbos-muted)' }}>
+                    <Loader2 className="animate-spin h-5 w-5 opacity-50" />
+                  </div>
+                )}
+                {!loading && col.orders.length === 0 && !error && (
                   <div className="text-center text-xs py-8" style={{ color: 'var(--wbos-muted)' }}>
                     No orders
                   </div>

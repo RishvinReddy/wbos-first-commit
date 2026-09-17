@@ -1,4 +1,7 @@
-import { Activity, Box, FileText, Bell, LayoutDashboard, Database, AlertTriangle, HelpCircle } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Activity, Box, FileText, Bell, LayoutDashboard, Database, AlertTriangle, HelpCircle, Loader2 } from "lucide-react";
 import { fetchEvents } from "@/lib/api";
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
@@ -21,32 +24,36 @@ const eventConfig: Record<string, { color: string; bg: string }> = {
   InventoryUpdated:     { color: 'var(--info)',     bg: 'var(--info-soft)' },
 };
 
-export default async function EventsPage() {
-  let events: any[] = [];
-  let error = null;
+export default function EventsPage() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const data = await fetchEvents();
-    events = data.map((evt: any) => {
-      const cfg = eventConfig[evt.type] ?? { color: 'var(--wbos-muted)', bg: 'var(--wbos-bg)' };
-      let detail = "";
-      if (evt.type === "OrderCreated" && evt.data?.orderId) detail = `Order ${evt.data.orderId} created`;
-      else if (evt.type === "InvoiceGenerated" && evt.data?.s3_key) detail = `Invoice stored: ${evt.data.s3_key}`;
-      else if (evt.type === "DashboardEvent" && evt.data?.messageId) detail = `Processed message: ${evt.data.messageId}`;
-      else detail = JSON.stringify(evt.data ?? {}).slice(0, 60) + "…";
+  useEffect(() => {
+    fetchEvents().then((data) => {
+      setEvents(data.map((evt: any) => {
+        const cfg = eventConfig[evt.type] ?? { color: 'var(--wbos-muted)', bg: 'var(--wbos-bg)' };
+        let detail = "";
+        if (evt.type === "OrderCreated" && evt.data?.orderId) detail = `Order ${evt.data.orderId} created`;
+        else if (evt.type === "InvoiceGenerated" && evt.data?.s3_key) detail = `Invoice stored: ${evt.data.s3_key}`;
+        else if (evt.type === "DashboardEvent" && evt.data?.messageId) detail = `Processed message: ${evt.data.messageId}`;
+        else detail = JSON.stringify(evt.data ?? {}).slice(0, 60) + "…";
 
-      return {
-        id: evt.eventId,
-        type: evt.type,
-        source: evt.data?.source || "EventBridge",
-        detail,
-        time: new Date(evt.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        ...cfg
-      };
+        return {
+          id: evt.eventId,
+          type: evt.type,
+          source: evt.data?.source || "EventBridge",
+          detail,
+          time: new Date(evt.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          ...cfg
+        };
+      }));
+      setLoading(false);
+    }).catch((err: any) => {
+      setError(err.message || "Failed to fetch events");
+      setLoading(false);
     });
-  } catch (err: any) {
-    error = err.message || "Failed to fetch events";
-  }
+  }, []);
 
   // Architecture nodes
   const archNodes = [
@@ -153,7 +160,13 @@ export default async function EventsPage() {
                 <h2 className="text-sm font-bold" style={{ color: 'var(--wbos-ink)' }}>System Events</h2>
               </div>
 
-              {events.length === 0 && !error && (
+              {loading && (
+                <div className="text-center py-16 flex justify-center text-sm" style={{ color: 'var(--wbos-muted)' }}>
+                  <Loader2 className="animate-spin h-6 w-6 opacity-50" />
+                </div>
+              )}
+
+              {!loading && events.length === 0 && !error && (
                 <div className="text-center py-16 text-sm" style={{ color: 'var(--wbos-muted)' }}>
                   No events yet. Send a message to start the pipeline.
                 </div>
