@@ -33,6 +33,20 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
+const DEMO_CUSTOMERS: Record<string, string> = {
+  "+919876543210": "Rahul Sharma",
+  "OWNER_USER": "Owner (Test)"
+};
+
+function formatTime(dateStr: string) {
+  if (!dateStr) return "--:--";
+  // Fix backend double timezone bug (e.g. 2026-09-18T08:18:17.123456+00:00Z)
+  const cleaned = dateStr.replace(/\+00:00Z$/, "Z");
+  const date = new Date(cleaned);
+  if (isNaN(date.getTime())) return "Invalid";
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function OrdersPage() {
   const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] });
   const [allOrders, setAllOrders] = useState<any[]>([]);
@@ -47,8 +61,8 @@ export default function OrdersPage() {
         const status = (order.status || "PENDING").toUpperCase();
         const obj = {
           id: order.orderId,
-          customer: order.customer,
-          time: new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          customer: DEMO_CUSTOMERS[order.customer] || order.customer,
+          time: formatTime(order.createdAt),
           items: order.itemCount,
           total: order.total
         };
@@ -145,7 +159,7 @@ export default function OrdersPage() {
                     </div>
 
                     <div className="text-sm font-semibold mb-1" style={{ color: 'var(--wbos-ink)' }}>{order.customer}</div>
-                    <div className="text-xs mb-3" style={{ color: 'var(--wbos-muted)' }}>{order.items} items</div>
+                    <div className="text-xs mb-3" style={{ color: 'var(--wbos-muted)' }}>{order.items} item(s)</div>
 
                     <div className="flex items-center justify-between pt-2 border-t"
                       style={{ borderColor: 'var(--wbos-border)' }}>

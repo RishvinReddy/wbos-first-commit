@@ -71,7 +71,8 @@ def get_pending_orders(tenant_id: str, status: str = "PENDING"):
             "customer": item.get("customerId"),
             "total": float(item.get("total", 0.0)),
             "itemCount": int(item.get("itemCount", 0)),
-            "createdAt": item.get("createdAt")
+            "createdAt": item.get("createdAt"),
+            "status": item.get("status", status)
         }
         for item in items
     ]

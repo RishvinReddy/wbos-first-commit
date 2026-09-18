@@ -41,6 +41,19 @@ function StatusBadge({ color, label }: { color: string; label: string }) {
   );
 }
 
+const DEMO_CUSTOMERS: Record<string, string> = {
+  "+919876543210": "Rahul Sharma",
+  "OWNER_USER": "Owner (Test)"
+};
+
+function formatTime(dateStr: string) {
+  if (!dateStr) return "--:--";
+  const cleaned = dateStr.replace(/\+00:00Z$/, "Z");
+  const date = new Date(cleaned);
+  if (isNaN(date.getTime())) return "Invalid";
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────
 
 export default function ExecutiveCockpit() {
@@ -242,7 +255,7 @@ export default function ExecutiveCockpit() {
                         </span>
                       </div>
                       <span className="text-xs" style={{ color: 'var(--wbos-muted)' }}>
-                        {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(order.createdAt)}
                       </span>
                     </div>
 
@@ -251,7 +264,7 @@ export default function ExecutiveCockpit() {
                       <div className="flex gap-8 text-xs">
                         <div>
                           <div className="font-medium mb-0.5" style={{ color: 'var(--wbos-muted)' }}>Customer</div>
-                          <div className="font-semibold" style={{ color: 'var(--wbos-ink)' }}>{order.customer}</div>
+                          <div className="font-semibold" style={{ color: 'var(--wbos-ink)' }}>{DEMO_CUSTOMERS[order.customer] || order.customer}</div>
                         </div>
                         <div>
                           <div className="font-medium mb-0.5" style={{ color: 'var(--wbos-muted)' }}>Items</div>

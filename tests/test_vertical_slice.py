@@ -47,7 +47,7 @@ def test_create_order_atomic_transaction(setup_db, ddb_client):
     )
     assert res["Item"]["stock"]["N"] == "8"
 
-@patch("core.execution.BedrockAdapter.converse")
+@patch("core.bedrock_adapter.BedrockAdapter.converse")
 def test_ingress_lambda_e2e(mock_converse, setup_db):
     # Mock Bedrock tool use response
     mock_converse.return_value = {
@@ -90,7 +90,7 @@ def test_ingress_lambda_e2e(mock_converse, setup_db):
     assert ops[0]["tool"] == "create_order"
     assert ops[0]["result"]["data"]["status"] == "PENDING"
 
-@patch("core.execution.BedrockAdapter.converse")
+@patch("core.bedrock_adapter.BedrockAdapter.converse")
 def test_ingress_idempotency(mock_converse, setup_db):
     mock_converse.return_value = {
         "content": [{"toolUse": {"name": "create_order", "input": {"items": [], "deliveryAddress": ""}}}]

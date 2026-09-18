@@ -39,7 +39,7 @@ export async function fetchEvents(): Promise<EventData[]> {
     return res.json();
 }
 
-export async function simulateWebhook(message: string, phone: string = "+919347761153"): Promise<SimulatorResponse> {
+export async function simulateWebhook(message: string, phone: string = "+919876543210"): Promise<SimulatorResponse> {
     const res = await fetch(`${API_URL}/simulator/webhook`, {
         method: 'POST',
         headers: { 

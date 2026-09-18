@@ -126,7 +126,7 @@ export default function ConversationsPage() {
                     SIMULATOR
                   </span>
                 </div>
-                <div className="text-xs" style={{ color: 'var(--wbos-muted)' }}>Customer · +91 9347761153</div>
+                <div className="text-xs" style={{ color: 'var(--wbos-muted)' }}>Customer · +91 9876543210</div>
               </div>
             </div>
 
