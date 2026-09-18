@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: WBOS v2 Live Edition - Serverless Infrastructure
 
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: amazon.nova-2-lite-v1:0
+    Description: Amazon Bedrock model ID used by the execution worker
+
 Globals:
   Function:
     Timeout: 30
@@ -150,7 +156,7 @@ Resources:
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_API_Secrets*"
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_Credentials*"
       Events:
         WebhookPostAPI:
           Type: HttpApi
@@ -173,7 +179,7 @@ Resources:
       Timeout: 60
       Environment:
         Variables:
-          BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref WBOSStoreTable
@@ -192,7 +198,7 @@ Resources:
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_API_Secrets*"
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_Credentials*"
       Events:
         ExecutionQueueEvent:
           Type: SQS
@@ -247,7 +253,7 @@ Resources:
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_API_Secrets*"
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_Credentials*"
       Events:
         InvoiceGeneratedEvent:
           Type: EventBridgeRule

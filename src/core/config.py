@@ -20,12 +20,9 @@ def get_meta_secrets():
         response = client.get_secret_value(SecretId="WBOS_Meta_Credentials")
         return json.loads(response["SecretString"])
     except Exception as e:
-        # Provide fallback defaults for automated tests only
-        return {
-            "META_ACCESS_TOKEN": "mock_token",
-            "META_APP_SECRET": "mock_secret_for_local_testing",
-            "META_PHONE_NUMBER_ID": "mock_phone_id",
-            "META_VERIFY_TOKEN": "WBOS_VERIFY_TOKEN"
-        }
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("Failed to load Meta credentials from Secrets Manager")
+        raise
 
 config = Config()
