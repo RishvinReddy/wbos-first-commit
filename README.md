@@ -756,7 +756,35 @@ inside the production execution path.
 | Demo execution adapter                                  | Removed                           |
 | Simulator API                                           | Removed                           |
 | Bedrock account authorization                           | **Pending AWS Support**           |
-| Complete live WhatsApp → Bedrock → WhatsApp transaction | **Pending Bedrock authorization** |
+
+## Architecture (Serverless Event-Driven)
+
+```mermaid
+flowchart TD
+    subgraph "Meta"
+      WhatsApp["WhatsApp User"] <--> MetaAPI["Meta Cloud API (v25.0)"]
+    end
+    
+    subgraph "AWS Serverless (WBOS Core)"
+      MetaAPI -- "Webhook" --> APIGW["API Gateway"]
+      APIGW --> Ingress["Ingress Lambda (Auth/HMAC)"]
+      Ingress -- "SQS Queue" --> Execution["Execution Lambda"]
+      
+      Execution -- "Intent Engine" --> DB[(DynamoDB)]
+      Execution -- "CustomerReplyRequested" --> EventBridge["EventBridge"]
+      EventBridge --> Notification["Notification Lambda"]
+    end
+    
+    Notification -- "Send Message" --> MetaAPI
+```
+
+### Components:
+- **API Gateway**: Provides the public HTTP endpoint for Meta webhook.
+- **Ingress Lambda**: Performs Meta HMAC validation, deduplication (Idempotency), and enqueues messages.
+- **SQS Queue**: Buffers incoming messages to handle high concurrency.
+- **Execution Lambda**: Extracts intent using a deterministic Regex Intent Engine and fetches data from DynamoDB domain services.
+- **EventBridge**: Decoupled event bus handling domain events (`CustomerReplyRequested`, `OrderCreated`).
+- **Notification Lambda**: Responsible for all outbound communication back to Meta's Graph API.
 
 The final end-to-end production transaction depends on AWS Bedrock account
 authorization and successful Meta WhatsApp configuration.

@@ -8,8 +8,8 @@ logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     """
-    Execution Worker for SQS ExecutionQueue.
-    Invokes Bedrock -> Tool Router -> DB -> EventBridge
+    Processes incoming messages from SQS queue.
+    Invokes Intent Engine -> DB -> EventBridge
     """
     for record in event.get('Records', []):
         try:

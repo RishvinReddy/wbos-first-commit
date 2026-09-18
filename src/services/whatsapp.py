@@ -1,7 +1,7 @@
 import json
 import logging
 import urllib.request
-from core.config import get_meta_secrets
+from core.config import get_meta_secrets, config
 
 logger = logging.getLogger(__name__)
 

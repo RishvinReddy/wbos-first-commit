@@ -64,7 +64,7 @@ def get_pending_orders(tenant_id: str, status: str = "PENDING"):
 
     items = response.get("Items", [])
 
-    # Map to simpler format for Bedrock
+    # Map to simpler format for Intent Engine
     return [
         {
             "orderId": item.get("orderId"),

@@ -2,12 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: WBOS v2 Live Edition - Serverless Infrastructure
 
-Parameters:
-  BedrockModelId:
-    Type: String
-    Default: amazon.nova-2-lite-v1:0
-    Description: Amazon Bedrock model ID used by the execution worker
-
 Globals:
   Function:
     Timeout: 30
@@ -177,9 +171,6 @@ Resources:
       CodeUri: src/
       Handler: handlers.execution.lambda_handler
       Timeout: 60
-      Environment:
-        Variables:
-          BEDROCK_MODEL_ID: !Ref BedrockModelId
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref WBOSStoreTable
@@ -188,12 +179,6 @@ Resources:
               Action:
                 - events:PutEvents
               Resource: !GetAtt WBOSEventBus.Arn
-        - Statement:
-            - Effect: Allow
-              Action:
-                - bedrock:InvokeModel
-                - bedrock:InvokeModelWithResponseStream
-              Resource: "*"
         - Statement:
             - Effect: Allow
               Action:
@@ -278,6 +263,20 @@ Resources:
                 - wbos.orders
               detail-type:
                 - OrderCreated
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+        CustomerReplyRequestedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.execution
+              detail-type:
+                - CustomerReplyRequested
             DeadLetterConfig:
               Arn: !GetAtt WBOSEventsDLQ.Arn
             RetryPolicy:

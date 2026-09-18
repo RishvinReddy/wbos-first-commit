@@ -5,11 +5,10 @@ from functools import lru_cache
 
 class Config:
     DYNAMODB_TABLE = os.environ.get("DYNAMODB_TABLE", "WBOS_Store")
-    BEDROCK_MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20240620-v1:0")
     AWS_REGION = os.environ.get("AWS_REGION", "ap-south-1")
     EVENT_BUS_NAME = os.environ.get("EVENT_BUS_NAME", "wbos-events")
     EXECUTION_QUEUE_URL = os.environ.get("EXECUTION_QUEUE_URL", "")
-    META_GRAPH_API_VERSION = os.environ.get("META_GRAPH_API_VERSION", "v20.0")
+    META_GRAPH_API_VERSION = os.environ.get("META_GRAPH_API_VERSION", "v25.0")
 
 @lru_cache(maxsize=1)
 def get_meta_secrets():

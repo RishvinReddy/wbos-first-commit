@@ -43,4 +43,12 @@ def lambda_handler(event, context):
         product_id = data.get("productId")
         logger.warning(f"Low stock detected for {product_id}. Skipping WhatsApp alert until Tenant Config is implemented.")
 
+    elif event_type == "CustomerReplyRequested":
+        customer_phone = data.get("customerPhone")
+        message = data.get("message")
+        if customer_phone and message:
+            send_whatsapp_text_message(customer_phone, message)
+        else:
+            logger.warning("Missing customerPhone or message in CustomerReplyRequested event")
+
     return {"status": "success"}
