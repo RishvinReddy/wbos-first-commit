@@ -8,6 +8,8 @@ applications:
             - npm ci
         build:
           commands:
+            - echo "NEXT_PUBLIC_USER_POOL_ID=$NEXT_PUBLIC_USER_POOL_ID" >> .env.production
+            - echo "NEXT_PUBLIC_USER_POOL_CLIENT_ID=$NEXT_PUBLIC_USER_POOL_CLIENT_ID" >> .env.production
             - npm run build
       artifacts:
         baseDirectory: .next
