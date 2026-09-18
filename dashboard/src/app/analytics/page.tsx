@@ -47,8 +47,8 @@ export default function AnalyticsPage() {
               DEMO DATA — Not live AWS metrics
             </span>
             <select className="rounded-md border px-3 py-1.5 text-sm font-medium outline-none"
-              style={{ 
-                background: 'var(--wbos-surface)', 
+              style={{
+                background: 'var(--wbos-surface)',
                 borderColor: 'var(--wbos-border)',
                 color: 'var(--wbos-ink-soft)'
               }}>

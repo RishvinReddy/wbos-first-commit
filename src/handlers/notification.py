@@ -2,51 +2,45 @@ import os
 import json
 import logging
 import boto3
+from services.whatsapp import send_whatsapp_text_message
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-# In a real system, we'd use secrets manager for the Meta Token
-# For MVP, we'll assume it's in the environment or fetched from SecretsManager
-
-def send_whatsapp_message(to_phone: str, text: str):
-    """
-    Mocks sending a WhatsApp message via Meta Cloud API.
-    """
-    logger.info(f"Sending WhatsApp to {to_phone}: {text}")
-    # mock implementation
-    return True
 
 def lambda_handler(event, context):
     """
     Handles EventBridge InvoiceGenerated and other notification events.
     """
     logger.info(f"Received event: {json.dumps(event)}")
-    
+
     detail = event.get("detail", {})
     event_type = detail.get("eventType")
     data = detail.get("data", {})
-    
-    # In a real app we'd query the DB to get the customer's phone number based on customerId
-    # For MVP vertical slice we hardcode the target phone
-    target_phone = "+919347761153"
-    
+
     if event_type == "InvoiceGenerated":
         order_id = data.get("orderId")
         invoice_url = data.get("invoiceUrl")
-        
-        message = f"Your order {order_id} has been confirmed!\nDownload your invoice here: {invoice_url}"
-        send_whatsapp_message(target_phone, message)
-        
+        customer_phone = data.get("customerPhone")
+
+        if customer_phone:
+            message = f"Your order {order_id} has been confirmed!\nDownload your invoice here: {invoice_url}"
+            send_whatsapp_text_message(customer_phone, message)
+        else:
+            logger.warning(f"No customerPhone provided in InvoiceGenerated event for order {order_id}")
+
     elif event_type == "OrderCreated":
-        # Additional order confirmation if needed, but usually we just send invoice
-        pass
-        
+        order_id = data.get("orderId")
+        customer_phone = data.get("customerPhone")
+
+        if customer_phone:
+            message = f"We have received your order {order_id}. We will process it shortly!"
+            send_whatsapp_text_message(customer_phone, message)
+        else:
+            logger.warning(f"No customerPhone provided in OrderCreated event for order {order_id}")
+
     elif event_type == "LowStockDetected":
         # Alert the owner
         product_id = data.get("productId")
-        owner_phone = "+919347761153"
-        message = f"ALERT: Product {product_id} is running low on stock."
-        send_whatsapp_message(owner_phone, message)
-    
+        logger.warning(f"Low stock detected for {product_id}. Skipping WhatsApp alert until Tenant Config is implemented.")
+
     return {"status": "success"}

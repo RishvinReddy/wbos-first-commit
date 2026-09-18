@@ -9,25 +9,25 @@ def get_daily_sales(tenant_id: str, date_str: str = None):
     """
     if not date_str:
         date_str = datetime.datetime.now(datetime.UTC).isoformat()[:10]
-        
+
     table = get_table()
     response = table.query(
         IndexName="GSI3",
         KeyConditionExpression=Key("GSI3PK").eq(f"TENANT#{tenant_id}#DATE#{date_str}")
     )
-    
+
     items = response.get("Items", [])
-    
+
     total_sales = 0.0
     order_count = 0
-    
+
     for order in items:
         if order.get("status") not in ["CANCELLED"]:
             total_sales += float(order.get("total", 0.0))
             order_count += 1
-            
+
     avg_order = total_sales / order_count if order_count > 0 else 0.0
-    
+
     return {
         "date": date_str,
         "total_sales": total_sales,
@@ -42,11 +42,11 @@ def get_sales_summary(tenant_id: str, period: str = "today"):
     """
     # Simplified MVP implementation for "today" or "yesterday"
     now = datetime.datetime.now(datetime.UTC)
-    
+
     if period == "yesterday":
         date_str = (now - datetime.timedelta(days=1)).isoformat()[:10]
         return get_daily_sales(tenant_id, date_str)
-        
+
     # Default today
     date_str = now.isoformat()[:10]
     return get_daily_sales(tenant_id, date_str)
@@ -61,9 +61,9 @@ def get_pending_orders(tenant_id: str, status: str = "PENDING"):
         IndexName="GSI2",
         KeyConditionExpression=Key("GSI2PK").eq(f"TENANT#{tenant_id}#STATUS#{status}")
     )
-    
+
     items = response.get("Items", [])
-    
+
     # Map to simpler format for Bedrock
     return [
         {
@@ -83,15 +83,15 @@ def get_low_stock_products(tenant_id: str, threshold_override: int = 10):
     For MVP, Scans products on tenant and filters by stock.
     """
     table = get_table()
-    
-    # In production with thousands of products, we'd use a dedicated GSI 
+
+    # In production with thousands of products, we'd use a dedicated GSI
     # e.g., GSI4PK=TENANT#...#LOWSTOCK. For vertical slice, a filtered scan is acceptable.
     response = table.scan(
         FilterExpression=Attr("tenantId").eq(tenant_id) & Attr("entityType").eq("PRODUCT") & Attr("stock").lt(threshold_override)
     )
-    
+
     items = response.get("Items", [])
-    
+
     return [
         {
             "productId": item.get("productId"),

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: WBOS v2 First Commit AWS Edition - Serverless Infrastructure
+Description: WBOS v2 Live Edition - Serverless Infrastructure
 
 Globals:
   Function:
@@ -12,20 +12,58 @@ Globals:
     Environment:
       Variables:
         DYNAMODB_TABLE: !Ref WBOSStoreTable
-        BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20240620-v1:0"
         EVENT_BUS_NAME: !Ref WBOSEventBus
-        WBOS_EXECUTION_MODE: "demo"
-
-  HttpApi:
-    CorsConfiguration:
-      AllowOrigins:
-        - "*"
-      AllowHeaders:
-        - "*"
-      AllowMethods:
-        - "*"
+        EXECUTION_QUEUE_URL: !Ref ExecutionQueue
 
 Resources:
+  WBOSHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "*"
+        AllowMethods:
+          - "*"
+      Auth:
+        Authorizers:
+          CognitoAuth:
+            JwtConfiguration:
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${DashboardUserPool}"
+              audience:
+                - !Ref DashboardUserPoolClient
+            IdentitySource: "$request.header.Authorization"
+
+  DashboardUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: wbos-dashboard-pool
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          RequireUppercase: true
+
+  DashboardUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref DashboardUserPool
+      ClientName: wbos-dashboard-client
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+
   WBOSStoreTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -79,6 +117,22 @@ Resources:
           Projection:
             ProjectionType: ALL
 
+  WBOSEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: wbos-events
+
+  WBOSEventsDLQ:
+    Type: AWS::SQS::Queue
+
+  ExecutionQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 90
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt WBOSEventsDLQ.Arn
+        maxReceiveCount: 3
+
   IngressFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -90,28 +144,61 @@ Resources:
         - Statement:
             - Effect: Allow
               Action:
+                - sqs:SendMessage
+              Resource: !GetAtt ExecutionQueue.Arn
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_API_Secrets*"
+      Events:
+        WebhookPostAPI:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WBOSHttpApi
+            Path: /webhook
+            Method: post
+        WebhookGetAPI:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WBOSHttpApi
+            Path: /webhook
+            Method: get
+
+  ExecutionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.execution.lambda_handler
+      Timeout: 60
+      Environment:
+        Variables:
+          BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: !GetAtt WBOSEventBus.Arn
+        - Statement:
+            - Effect: Allow
+              Action:
                 - bedrock:InvokeModel
                 - bedrock:InvokeModelWithResponseStream
               Resource: "*"
         - Statement:
             - Effect: Allow
               Action:
-                - events:PutEvents
-              Resource: !GetAtt WBOSEventBus.Arn
+                - secretsmanager:GetSecretValue
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_API_Secrets*"
       Events:
-        WebhookAPI:
-          Type: HttpApi
+        ExecutionQueueEvent:
+          Type: SQS
           Properties:
-            Path: /webhook
-            Method: post
-
-  WBOSEventBus:
-    Type: AWS::Events::EventBus
-    Properties:
-      Name: wbos-events
-
-  WBOSEventsDLQ:
-    Type: AWS::SQS::Queue
+            Queue: !GetAtt ExecutionQueue.Arn
+            BatchSize: 1
 
   InvoiceBucket:
     Type: AWS::S3::Bucket
@@ -160,7 +247,7 @@ Resources:
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: "*" # For MVP, would be restricted to Meta App Secret
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:WBOS_Meta_API_Secrets*"
       Events:
         InvoiceGeneratedEvent:
           Type: EventBridgeRule
@@ -199,23 +286,15 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref WBOSStoreTable
-        - Statement:
-            - Effect: Allow
-              Action:
-                - bedrock:InvokeModel
-                - bedrock:InvokeModelWithResponseStream
-              Resource: "*"
-        - Statement:
-            - Effect: Allow
-              Action:
-                - events:PutEvents
-              Resource: !GetAtt WBOSEventBus.Arn
       Events:
         DashboardApi:
           Type: HttpApi
           Properties:
+            ApiId: !Ref WBOSHttpApi
             Path: /api/{proxy+}
             Method: any
+            Auth:
+              Authorizer: CognitoAuth
 
   DashboardEventFunction:
     Type: AWS::Serverless::Function
@@ -243,7 +322,16 @@ Resources:
 Outputs:
   WebhookApiUrl:
     Description: "API Gateway endpoint URL for Prod environment"
-    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook"
-  IngressFunctionArn:
-    Description: "Ingress Lambda Function ARN"
-    Value: !GetAtt IngressFunction.Arn
+    Value: !Sub "https://${WBOSHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook"
+  DashboardApiUrl:
+    Description: "API Gateway endpoint URL for Dashboard API"
+    Value: !Sub "https://${WBOSHttpApi}.execute-api.${AWS::Region}.amazonaws.com/api"
+  UserPoolId:
+    Description: "Cognito User Pool ID"
+    Value: !Ref DashboardUserPool
+  UserPoolClientId:
+    Description: "Cognito User Pool Client ID"
+    Value: !Ref DashboardUserPoolClient
+  ExecutionQueueUrl:
+    Description: "Execution SQS Queue URL"
+    Value: !Ref ExecutionQueue

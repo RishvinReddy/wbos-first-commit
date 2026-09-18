@@ -2,15 +2,17 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "../styles/globals.css";
 import Link from "next/link";
-import { 
-  Activity, 
-  Package, 
-  ShoppingCart, 
-  LayoutDashboard, 
-  MessageSquare, 
-  Users, 
-  Truck, 
-  BarChart3, 
+import AuthWrapper from "@/components/AuthWrapper";
+import ConfigureAmplifyClientSide from "@/components/ConfigureAmplifyClientSide";
+import {
+  Activity,
+  Package,
+  ShoppingCart,
+  LayoutDashboard,
+  MessageSquare,
+  Users,
+  Truck,
+  BarChart3,
   Bot,
   Search,
   Zap
@@ -70,11 +72,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${outfit.className} antialiased flex h-full overflow-hidden`} style={{ background: 'var(--wbos-bg)', color: 'var(--wbos-ink)' }}>
-
+        <ConfigureAmplifyClientSide />
+        <AuthWrapper>
         {/* ─── SIDEBAR ───────────────────────────────────── */}
         <nav className="w-60 flex flex-col h-screen shrink-0 border-r"
-          style={{ 
-            background: 'var(--wbos-surface)', 
+          style={{
+            background: 'var(--wbos-surface)',
             borderColor: 'var(--wbos-border)',
             boxShadow: 'var(--shadow-subtle)'
           }}>
@@ -148,8 +151,8 @@ export default function RootLayout({
 
           {/* Top Bar */}
           <header className="h-14 shrink-0 flex items-center justify-between px-6 border-b"
-            style={{ 
-              background: 'var(--wbos-surface)', 
+            style={{
+              background: 'var(--wbos-surface)',
               borderColor: 'var(--wbos-border)',
               boxShadow: 'var(--shadow-subtle)'
             }}>
@@ -170,7 +173,7 @@ export default function RootLayout({
 
               {/* Mode indicator */}
               <div className="flex items-center gap-2 px-3 py-1 rounded-md border text-xs font-bold"
-                style={{ 
+                style={{
                   background: isDemo ? 'var(--wbos-bg)' : 'var(--success-soft)',
                   borderColor: isDemo ? 'var(--wbos-border)' : 'var(--success)',
                   color: isDemo ? 'var(--wbos-muted)' : 'var(--success)'
@@ -194,6 +197,7 @@ export default function RootLayout({
             </div>
           </main>
         </div>
+        </AuthWrapper>
       </body>
     </html>
   );

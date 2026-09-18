@@ -89,13 +89,13 @@ export default function EventsPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* Architecture Panel */}
         <div className="lg:col-span-4">
           <Section label="Architecture">
             <div className="rounded-xl border overflow-hidden"
               style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
-              
+
               <div className="px-5 py-4 border-b"
                 style={{ borderColor: 'var(--wbos-border)', background: 'var(--wbos-bg)' }}>
                 <h2 className="text-sm font-bold" style={{ color: 'var(--wbos-ink)' }}>Topology</h2>

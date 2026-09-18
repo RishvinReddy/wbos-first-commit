@@ -232,7 +232,7 @@ export default function ExecutiveCockpit() {
                     <span className="text-xs font-medium">Loading live pipeline...</span>
                   </div>
                 )}
-                
+
                 {!loading && pipeline.length === 0 && !error && (
                   <div className="text-center py-10 text-sm font-medium"
                     style={{ color: 'var(--wbos-muted)', border: '1px dashed var(--wbos-border)', borderRadius: '8px' }}>
@@ -391,7 +391,7 @@ export default function ExecutiveCockpit() {
                 const barColor = item.status === 'low' ? 'var(--danger)' : item.status === 'warning' ? 'var(--warning)' : 'var(--success)';
                 const statusColor = item.status === 'low' ? 'var(--danger)' : item.status === 'warning' ? 'var(--warning)' : 'var(--success)';
                 const statusBg = item.status === 'low' ? 'var(--danger-soft)' : item.status === 'warning' ? 'var(--warning-soft)' : 'var(--success-soft)';
-                
+
                 return (
                   <div key={i} className="grid grid-cols-[1fr_60px_80px_70px] gap-3 items-center px-5 py-3.5 hover:opacity-90 transition-opacity"
                     style={{ background: i % 2 === 1 ? 'var(--wbos-bg)' : undefined }}>

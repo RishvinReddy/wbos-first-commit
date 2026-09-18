@@ -39,15 +39,15 @@ class BedrockAdapter:
                 "temperature": 0.0
             }
         }
-        
+
         if system_prompt:
             request_args["system"] = [{"text": system_prompt}]
-            
+
         if bedrock_tools:
             request_args["toolConfig"] = {
                 "tools": bedrock_tools
             }
-            
+
         response = self.client.converse(**request_args)
-        
+
         return response["output"]["message"]

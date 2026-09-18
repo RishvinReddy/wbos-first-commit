@@ -25,7 +25,7 @@ def publish(event_type: str, tenant_id: str, data: Dict[str, Any], source: str):
     """
     event_bus = os.environ.get("EVENT_BUS_NAME", "wbos-events")
     now = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
-    
+
     envelope = {
         "eventId": str(uuid.uuid4()),
         "eventType": event_type,
@@ -35,7 +35,7 @@ def publish(event_type: str, tenant_id: str, data: Dict[str, Any], source: str):
         "source": source,
         "data": data
     }
-    
+
     try:
         client = get_events_client()
         response = client.put_events(

@@ -24,38 +24,34 @@ def lambda_handler(event, context):
             return {"statusCode": 200, "headers": _cors_headers(), "body": ""}
 
         # Identity & Authorization
-        headers = event.get("headers", {})
-        # lowercase headers since API gateway converts them
-        headers = {k.lower(): v for k, v in headers.items()}
-        
-        exec_context = resolve_dashboard_context(headers)
-        
+        exec_context = resolve_dashboard_context(event)
+
         # Only OWNER can access the dashboard API
         if exec_context.role != "OWNER":
             raise AccessDeniedError("Dashboard is restricted to OWNER role")
-            
+
         path = event.get("rawPath", "")
         tenant_id = exec_context.tenant_id
-        
+
         # Route requests
         if path == "/api/metrics":
             data = get_sales_summary(tenant_id, "today")
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
-            
+
         elif path == "/api/orders":
             # For pipeline view, fetch all relevant statuses
             pending = get_pending_orders(tenant_id, "PENDING")
             preparing = get_pending_orders(tenant_id, "PREPARING")
             ready = get_pending_orders(tenant_id, "READY")
-            
+
             data = pending + preparing + ready
             # Sort by created time descending
             data.sort(key=lambda x: x["createdAt"], reverse=True)
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
-            
+
         elif path == "/api/inventory":
             table = get_table()
-            
+
             # We use GSI3 where GSI3PK = TENANT#{tenant_id}#PRODUCTS
             response = table.query(
                 IndexName="GSI3",
@@ -73,7 +69,7 @@ def lambda_handler(event, context):
                 for item in items
             ]
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
-            
+
         elif path == "/api/events":
             # Query the events table/index
             # PK = TENANT#{tenant_id}#EVENTS
@@ -83,7 +79,7 @@ def lambda_handler(event, context):
                 ScanIndexForward=False, # Descending (newest first)
                 Limit=50
             )
-            
+
             data = []
             for item in response.get("Items", []):
                 data.append({
@@ -92,45 +88,12 @@ def lambda_handler(event, context):
                     "timestamp": item.get("timestamp"),
                     "data": item.get("data", {})
                 })
-            
+
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
-            
-        elif path == "/api/simulator/webhook":
-            body_str = event.get("body", "{}")
-            if event.get("isBase64Encoded"):
-                import base64
-                body_str = base64.b64decode(body_str).decode('utf-8')
-            
-            payload = json.loads(body_str)
-            message_text = payload.get("message", "")
-            customer_phone = payload.get("phone", "+919347761153")
-            
-            # Generate a mock message ID for idempotency tracking
-            message_id = "sim_wamid_" + str(uuid.uuid4())
-            req_id = context.aws_request_id if context else "local_sim"
-            
-            # Resolve the demo identity for the execution
-            demo_context = resolve_execution_context(customer_phone)
-            
-            # Ensure the demo user belongs to the same tenant as the dashboard OWNER
-            if demo_context.tenant_id != tenant_id:
-                raise AccessDeniedError("Simulator customer tenant mismatch")
-            
-            logger.info(json.dumps({
-                "action": "simulator_invoked",
-                "requestId": req_id,
-                "tenantId": demo_context.tenant_id,
-                "simulatedRole": demo_context.role
-            }))
-            
-            # Shared WBOS execution pipeline
-            result = execute_message(demo_context, message_text, message_id, req_id)
-            
-            return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(result)}
-            
+
         else:
             return {"statusCode": 404, "headers": _cors_headers(), "body": json.dumps({"error": "Not Found"})}
-            
+
     except AccessDeniedError as e:
         logger.warning(str(e))
         return {"statusCode": 403, "headers": _cors_headers(), "body": json.dumps({"error": str(e)})}

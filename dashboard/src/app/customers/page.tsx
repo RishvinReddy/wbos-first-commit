@@ -30,7 +30,7 @@ export default function CustomersPage() {
         {/* Customer List */}
         <div className="w-72 shrink-0 rounded-xl border overflow-hidden flex flex-col"
           style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
-          
+
           <div className="p-3 border-b" style={{ borderColor: 'var(--wbos-border)', background: 'var(--wbos-bg)' }}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: 'var(--wbos-muted)' }} />
@@ -38,8 +38,8 @@ export default function CustomersPage() {
                 type="text"
                 placeholder="Search customers…"
                 className="w-full rounded-md pl-8 pr-3 py-2 text-sm outline-none border"
-                style={{ 
-                  background: 'var(--wbos-surface)', 
+                style={{
+                  background: 'var(--wbos-surface)',
                   borderColor: 'var(--wbos-border)',
                   color: 'var(--wbos-ink)'
                 }}
@@ -53,7 +53,7 @@ export default function CustomersPage() {
                 className="flex items-center gap-3 px-4 py-3.5 cursor-pointer transition-colors hover:opacity-90"
                 style={{ background: i === 0 ? 'var(--wbos-green-subtle)' : undefined }}>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ 
+                  style={{
                     background: i === 0 ? 'var(--wbos-green)' : 'var(--wbos-border)',
                     color: i === 0 ? 'white' : 'var(--wbos-muted)'
                   }}>
@@ -142,7 +142,7 @@ export default function CustomersPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold font-mono" style={{ color: 'var(--wbos-ink)' }}>{order.id}</span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md"
-                        style={{ 
+                        style={{
                           background: order.status === 'Delivered' ? 'var(--success-soft)' : 'var(--warning-soft)',
                           color: order.status === 'Delivered' ? 'var(--success)' : 'var(--warning)'
                         }}>

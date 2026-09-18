@@ -1,8 +1,9 @@
 import os
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+os.environ["AWS_REGION"] = "us-east-1"
 os.environ["DYNAMODB_TABLE"] = "WBOS_Store_Test"
-os.environ["META_APP_SECRET"] = "secret"
+os.environ["META_APP_SECRET"] = "mock_secret_for_local_testing"
 os.environ["AWS_ACCESS_KEY_ID"] = "testing"
 os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
 os.environ["AWS_SECURITY_TOKEN"] = "testing"
@@ -27,8 +28,13 @@ def aws_credentials():
 
 @pytest.fixture(scope="function")
 def ddb_client(aws_credentials):
+    import core.db
+    core.db._dynamodb = None
+    core.db._dynamodb_client = None
     with mock_aws():
         yield boto3.client("dynamodb", region_name="us-east-1")
+    core.db._dynamodb = None
+    core.db._dynamodb_client = None
 
 @pytest.fixture(scope="function")
 def setup_db(ddb_client):
@@ -78,7 +84,7 @@ def setup_db(ddb_client):
         ],
         BillingMode="PAY_PER_REQUEST"
     )
-    
+
     # Seed data
     ddb_client.put_item(
         TableName=table_name,

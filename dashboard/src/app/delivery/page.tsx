@@ -85,7 +85,7 @@ export default function DeliveryPage() {
         <div className="lg:col-span-2 space-y-4">
           {/* Map placeholder */}
           <div className="rounded-xl border overflow-hidden relative flex items-center justify-center"
-            style={{ 
+            style={{
               background: 'var(--wbos-surface)',
               borderColor: 'var(--wbos-border)',
               boxShadow: 'var(--shadow-card)',
@@ -135,10 +135,10 @@ export default function DeliveryPage() {
               {demoDeliveries.map((d, i) => (
                 <div key={i} className="flex items-center gap-4 px-5 py-4">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ 
+                    style={{
                       background: d.driver === 'Pending' ? 'var(--warning-soft)' : 'var(--success-soft)'
                     }}>
-                    {d.driver === 'Pending' 
+                    {d.driver === 'Pending'
                       ? <Package className="h-5 w-5" style={{ color: 'var(--warning)' }} />
                       : <Truck className="h-5 w-5" style={{ color: 'var(--success)' }} />
                     }
@@ -156,7 +156,7 @@ export default function DeliveryPage() {
 
                   <div className="text-right">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-md block mb-1"
-                      style={{ 
+                      style={{
                         background: d.driver === 'Pending' ? 'var(--warning-soft)' : 'var(--success-soft)',
                         color: d.driver === 'Pending' ? 'var(--warning)' : 'var(--success)'
                       }}>

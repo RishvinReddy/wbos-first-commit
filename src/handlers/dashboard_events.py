@@ -18,16 +18,16 @@ def lambda_handler(event, context):
         event_type = event.get("detail-type", "UnknownEvent")
         detail = event.get("detail", {})
         tenant_id = detail.get("tenantId")
-        
+
         if not tenant_id:
             logger.warning(f"Event {event_type} missing tenantId. Skipping.")
             return
-            
+
         timestamp = event.get("time", datetime.datetime.now(datetime.UTC).isoformat() + "Z")
         event_id = event.get("id", str(uuid.uuid4()))
-        
+
         client = get_client()
-        
+
         # PK = TENANT#{tenant_id}#EVENTS
         # SK = TIME#{timestamp}#{event_id}
         client.put_item(
@@ -43,10 +43,10 @@ def lambda_handler(event, context):
                 "data": {"S": json.dumps(detail.get("data", {}))}
             }
         )
-        
+
         logger.info(f"Persisted event {event_type} for tenant {tenant_id}")
         return {"status": "success"}
-        
+
     except Exception as e:
         logger.error(f"Error persisting event: {e}")
         raise

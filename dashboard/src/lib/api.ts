@@ -1,11 +1,22 @@
 import { MetricsData, OrderData, ProductData, EventData, SimulatorResponse } from './types';
+import { fetchAuthSession } from 'aws-amplify/auth';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api';
-const OWNER_TOKEN = process.env.NEXT_PUBLIC_OWNER_TOKEN || 'OWNER_TOKEN';
+
+const getAuthToken = async () => {
+    try {
+        const session = await fetchAuthSession();
+        return session.tokens?.accessToken?.toString() || '';
+    } catch (e) {
+        console.error("No valid Cognito session found", e);
+        return '';
+    }
+};
 
 export async function fetchMetrics(): Promise<MetricsData> {
+    const token = await getAuthToken();
     const res = await fetch(`${API_URL}/metrics`, {
-        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
+        headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch metrics');
@@ -13,8 +24,9 @@ export async function fetchMetrics(): Promise<MetricsData> {
 }
 
 export async function fetchOrders(): Promise<OrderData[]> {
+    const token = await getAuthToken();
     const res = await fetch(`${API_URL}/orders`, {
-        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
+        headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch orders');
@@ -22,8 +34,9 @@ export async function fetchOrders(): Promise<OrderData[]> {
 }
 
 export async function fetchInventory(): Promise<ProductData[]> {
+    const token = await getAuthToken();
     const res = await fetch(`${API_URL}/inventory`, {
-        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
+        headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch inventory');
@@ -31,24 +44,11 @@ export async function fetchInventory(): Promise<ProductData[]> {
 }
 
 export async function fetchEvents(): Promise<EventData[]> {
+    const token = await getAuthToken();
     const res = await fetch(`${API_URL}/events`, {
-        headers: { Authorization: `Bearer ${OWNER_TOKEN}` },
+        headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch events');
-    return res.json();
-}
-
-export async function simulateWebhook(message: string, phone: string = "+919876543210"): Promise<SimulatorResponse> {
-    const res = await fetch(`${API_URL}/simulator/webhook`, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OWNER_TOKEN}` 
-        },
-        body: JSON.stringify({ message, phone }),
-        cache: 'no-store'
-    });
-    if (!res.ok) throw new Error('Simulator request failed');
     return res.json();
 }

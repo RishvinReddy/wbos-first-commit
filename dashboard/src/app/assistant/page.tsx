@@ -70,8 +70,8 @@ export default function AssistantPage() {
         {quickActions.map((qa) => (
           <button key={qa} onClick={() => setQuery(qa)}
             className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:opacity-80"
-            style={{ 
-              background: 'var(--wbos-surface)', 
+            style={{
+              background: 'var(--wbos-surface)',
               borderColor: 'var(--wbos-border)',
               color: 'var(--wbos-ink-soft)'
             }}>
@@ -82,8 +82,8 @@ export default function AssistantPage() {
 
       {/* Terminal */}
       <div className="rounded-xl overflow-hidden border flex flex-col"
-        style={{ 
-          background: '#1a1d23', 
+        style={{
+          background: '#1a1d23',
           borderColor: 'rgba(255,255,255,0.08)',
           height: 'calc(100vh - 22rem)'
         }}>
@@ -103,11 +103,11 @@ export default function AssistantPage() {
           {history.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-xl px-4 py-3 ${
-                msg.role === 'user' 
-                  ? 'rounded-tr-sm' 
+                msg.role === 'user'
+                  ? 'rounded-tr-sm'
                   : 'rounded-tl-sm'
               }`}
-                style={{ 
+                style={{
                   background: msg.role === 'user' ? 'rgba(0,168,132,0.15)' : 'rgba(255,255,255,0.05)',
                   border: msg.role === 'user' ? '1px solid rgba(0,168,132,0.3)' : '1px solid rgba(255,255,255,0.06)',
                 }}>

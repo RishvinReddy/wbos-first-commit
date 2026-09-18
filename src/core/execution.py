@@ -16,7 +16,7 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
     Used by both the production Meta webhook and the demo simulator.
     """
     tenant_id = context_obj.tenant_id
-    
+
     # 1. Idempotency Check
     client = get_client()
     now = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
@@ -40,35 +40,28 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
             }))
             return {"status": "duplicate"}
         raise
-    
-    # 2. Adapter Selection
-    execution_mode = os.environ.get("WBOS_EXECUTION_MODE", "live").lower()
-    
-    if execution_mode == "live":
-        from core.bedrock_adapter import BedrockAdapter
-        adapter = BedrockAdapter()
-        logger.info(json.dumps({"action": "execution_mode", "mode": "live", "requestId": req_id}))
-    else:
-        from core.demo_adapter import DemoAdapter
-        adapter = DemoAdapter()
-        logger.info(json.dumps({"action": "execution_mode", "mode": "demo", "requestId": req_id}))
-    
+
+    # 2. Initialize Bedrock Adapter
+    from core.bedrock_adapter import BedrockAdapter
+    adapter = BedrockAdapter()
+    logger.info(json.dumps({"action": "execution_mode", "mode": "live", "requestId": req_id}))
+
     # Construct conversational history
     messages = [{
         "role": "user",
         "content": [{"text": message_text}]
     }]
-    
+
     system_prompt = (
         f"You are WBOS. You are talking to a user with role {context_obj.role}. "
         "Use the provided tools to search products, check inventory, and create orders. "
         "If they are an OWNER, you can use analytics tools to summarize store performance. "
         "Never make up prices or stock."
     )
-    
+
     # Call Adapter
     bedrock_response = adapter.converse(messages, system_prompt)
-    
+
     # 3. Tool Router
     # Bedrock response might contain toolUse blocks
     results = []
@@ -81,19 +74,19 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
                     "requestId": req_id,
                     "tool": tool_use["name"]
                 }))
-                
+
                 # 4. Domain Service & DB
                 result = handle_tool_use(context_obj, tool_use)
                 results.append({
                     "tool": tool_use["name"],
                     "result": result
                 })
-                
+
     logger.info(json.dumps({
         "action": "bedrock_processed",
         "requestId": req_id,
         "tenantId": tenant_id,
         "status": "success"
     }))
-    
+
     return {"status": "success", "operations": results}

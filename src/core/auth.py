@@ -33,31 +33,41 @@ RBAC_MATRIX = {
         "check_inventory",
         "create_order",
         "cancel_order"
-    }
+    },
+    "UNREGISTERED": set()
 }
 
 def resolve_execution_context(phone_number: str) -> ExecutionContext:
     """
-    Deterministically resolves the caller's identity and role.
-    In MVP/Vertical slice, we hardcode the owner's phone number.
-    In production, this would query a Users/Tenants table.
+    Deterministically resolves the caller's identity and role from the database.
     """
-    # Hardcoded owner for the demo
-    if phone_number == "+919347761153":
-        return ExecutionContext(
-            tenant_id="TENANT_001",
-            actor_id="OWNER_USER",
-            role="OWNER",
-            channel="WHATSAPP"
-        )
-    else:
-        # Default customer mapping
-        return ExecutionContext(
-            tenant_id="TENANT_001",
-            actor_id=phone_number, # using phone as ID for mock
-            role="CUSTOMER",
-            channel="WHATSAPP"
-        )
+    from core.db import get_table
+    table = get_table()
+    tenant_id = "TENANT_001" # Single tenant MVP
+
+    # Check if this phone number is registered as a customer/owner
+    # In a real multi-tenant system we'd use a GSI or Phone table
+    try:
+        res = table.get_item(Key={"PK": f"TENANT#{tenant_id}#CUSTOMER#{phone_number}", "SK": "METADATA"})
+        item = res.get("Item")
+
+        if item:
+            role = item.get("role", "CUSTOMER")
+            actor_id = item.get("customerId", phone_number)
+        else:
+            role = "UNREGISTERED"
+            actor_id = phone_number
+    except Exception as e:
+        logger.warning(f"Failed to lookup customer context: {e}")
+        role = "UNREGISTERED"
+        actor_id = phone_number
+
+    return ExecutionContext(
+        tenant_id=tenant_id,
+        actor_id=actor_id,
+        role=role,
+        channel="WHATSAPP"
+    )
 
 def authorize_tool(context: ExecutionContext, tool_name: str) -> bool:
     """
@@ -65,39 +75,38 @@ def authorize_tool(context: ExecutionContext, tool_name: str) -> bool:
     Raises AccessDeniedError if unauthorized.
     """
     permitted_tools = RBAC_MATRIX.get(context.role, set())
-    
+
     if tool_name not in permitted_tools:
         logger.warning(
             f"ACCESS DENIED: Role '{context.role}' attempted to execute unauthorized tool '{tool_name}'."
         )
         raise AccessDeniedError(f"AccessDenied: Your role ({context.role}) does not have permission to execute {tool_name}")
-        
+
     logger.info(f"ACCESS GRANTED: Role '{context.role}' executing '{tool_name}'")
     return True
 
-def resolve_dashboard_context(headers: dict) -> ExecutionContext:
+def resolve_dashboard_context(event: dict) -> ExecutionContext:
     """
-    Deterministically resolves the caller's identity for the Dashboard API.
-
-    MVP authentication uses explicit demo credentials. Unknown or missing
-    credentials are rejected rather than defaulting to OWNER.
+    Resolves the caller's identity for the Dashboard API exclusively from Cognito JWT claims.
     """
-    auth_header = headers.get("authorization", "")
+    try:
+        claims = event.get("requestContext", {}).get("authorizer", {}).get("jwt", {}).get("claims", {})
 
-    if auth_header == "Bearer OWNER_TOKEN":
+        # Require JWT claims for dashboard access
+        if not claims:
+            raise AccessDeniedError("Missing JWT claims. Unauthorized access.")
+
+        # The email is present in Cognito JWT claims
+        email = claims.get("email", "unknown_user")
+        sub = claims.get("sub", "unknown_sub")
+
         return ExecutionContext(
-            tenant_id="TENANT_001",
-            actor_id="OWNER_USER",
+            tenant_id="TENANT_001", # For MVP, assume single tenant
+            actor_id=email,
             role="OWNER",
             channel="WEB"
         )
-
-    if auth_header == "Bearer CUSTOMER_TOKEN":
-        return ExecutionContext(
-            tenant_id="TENANT_001",
-            actor_id="CUS_MOCK",
-            role="CUSTOMER",
-            channel="WEB"
-        )
-
-    raise AccessDeniedError("Invalid or missing dashboard credentials")
+    except AccessDeniedError:
+        raise
+    except Exception as e:
+        raise AccessDeniedError(f"Invalid dashboard credentials: {e}")
