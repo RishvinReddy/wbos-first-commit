@@ -1,7 +1,7 @@
 import ClientBuilder from "./client";
 
 export async function generateStaticParams() {
-  return [];
+  return [{ id: 'new' }];
 }
 
 export default function Page({ params }: { params: { id: string } }) {
