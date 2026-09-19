@@ -41,11 +41,13 @@ def lambda_handler(event, context):
 
         elif path == "/api/orders":
             # For pipeline view, fetch all relevant statuses
-            pending = get_pending_orders(tenant_id, "PENDING")
+            new_orders = get_pending_orders(tenant_id, "NEW")
+            confirmed = get_pending_orders(tenant_id, "CONFIRMED")
             preparing = get_pending_orders(tenant_id, "PREPARING")
             ready = get_pending_orders(tenant_id, "READY")
+            delivery = get_pending_orders(tenant_id, "DELIVERY")
 
-            data = pending + preparing + ready
+            data = new_orders + confirmed + preparing + ready + delivery
             # Sort by created time descending
             data.sort(key=lambda x: x["createdAt"], reverse=True)
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
@@ -70,6 +72,22 @@ def lambda_handler(event, context):
                 for item in items
             ]
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
+
+        elif path == "/api/workers":
+            table = get_table()
+            response = table.query(
+                KeyConditionExpression=Key("PK").eq(f"TENANT#{tenant_id}") & Key("SK").begins_with("WORKER#")
+            )
+            workers = []
+            for item in response.get("Items", []):
+                workers.append({
+                    "workerId": item.get("workerId"),
+                    "name": item.get("name"),
+                    "role": item.get("role"),
+                    "status": item.get("status", "AVAILABLE"),
+                    "activeOrders": int(item.get("activeOrders", 0))
+                })
+            return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(workers)}
 
         elif path == "/api/events":
             # Query the events table/index

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, AlertTriangle, Clock, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { fetchOrders } from "@/lib/api";
+import OrderDetailDrawer from "@/components/OrderDetailDrawer";
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -52,8 +53,10 @@ export default function OrdersPage() {
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadOrders = () => {
+    setLoading(true);
     fetchOrders().then((data) => {
       setAllOrders(data);
       const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] };
@@ -77,6 +80,10 @@ export default function OrdersPage() {
       setError(err.message || "Failed to fetch orders");
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    loadOrders();
   }, []);
 
   const columns = [
@@ -104,7 +111,7 @@ export default function OrdersPage() {
             </span>
             <span className="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase"
               style={{ background: 'var(--ai-soft)', color: 'var(--ai)' }}>
-              AI Routing: ON
+              Intent Routing: ON
             </span>
           </div>
         </div>
@@ -148,7 +155,7 @@ export default function OrdersPage() {
                   </div>
                 )}
                 {col.orders.map((order: any) => (
-                  <div key={order.id} className="rounded-lg border p-3 transition-colors hover:opacity-90 cursor-pointer"
+                  <div key={order.id} onClick={() => setSelectedOrderId(order.id)} className="rounded-lg border p-3 transition-colors hover:opacity-90 cursor-pointer"
                     style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)' }}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-bold font-mono" style={{ color: 'var(--wbos-ink)' }}>{order.id}</span>
@@ -173,6 +180,14 @@ export default function OrdersPage() {
           ))}
         </div>
       </Section>
+      
+      {selectedOrderId && (
+         <OrderDetailDrawer 
+           orderId={selectedOrderId} 
+           onClose={() => setSelectedOrderId(null)} 
+           onUpdate={() => loadOrders()} 
+         />
+      )}
     </div>
   );
 }

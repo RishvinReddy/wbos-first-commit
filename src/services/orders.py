@@ -150,3 +150,138 @@ def create_order(tenant_id: str, customer_id: str, customer_phone: str, items: l
         "total": float(total),
         "items": order_items_records
     }
+
+def transition_order_state(tenant_id: str, order_id: str, payload: dict, actor: str):
+    """
+    Deterministically transitions an order's state.
+    """
+    transition = payload.get("transition")
+    if not transition:
+        raise ValueError("Transition is required")
+        
+    valid_transitions = {
+        "CONFIRM": {"from": "NEW", "to": "CONFIRMED"},
+        "START_PREPARATION": {"from": "CONFIRMED", "to": "PREPARING"},
+        "COMPLETE_PREPARATION": {"from": "PREPARING", "to": "READY"},
+        "DISPATCH": {"from": "READY", "to": "DELIVERY"},
+        "DELIVER": {"from": "DELIVERY", "to": "DELIVERED"},
+        "CANCEL": {"from": ["NEW", "CONFIRMED", "PREPARING"], "to": "CANCELLED"}
+    }
+    
+    if transition not in valid_transitions:
+        raise ValueError(f"Invalid transition: {transition}")
+        
+    rule = valid_transitions[transition]
+    expected_old_state = rule["from"]
+    new_state = rule["to"]
+    
+    # Payload validation
+    worker_id = None
+    driver_id = None
+    if transition == "START_PREPARATION":
+        worker_id = payload.get("workerId")
+        if not worker_id:
+            raise ValueError("workerId is required to start preparation")
+    elif transition == "DISPATCH":
+        driver_id = payload.get("driverId")
+        if not driver_id:
+            raise ValueError("driverId is required for dispatch")
+
+    now = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
+    new_gsi2pk = f"TENANT#{tenant_id}#STATUS#{new_state}"
+    
+    # Determine the ConditionExpression for old state
+    if isinstance(expected_old_state, list):
+        # E.g. Cancel from multiple possible states
+        in_expr = ", ".join([f":st{i}" for i in range(len(expected_old_state))])
+        condition_expr = f"#st IN ({in_expr})"
+        expr_vals = {f":st{i}": {"S": expected_old_state[i]} for i in range(len(expected_old_state))}
+    else:
+        condition_expr = "#st = :old_status"
+        expr_vals = {":old_status": {"S": expected_old_state}}
+
+    expr_vals[":new_status"] = {"S": new_state}
+    expr_vals[":new_gsi2pk"] = {"S": new_gsi2pk}
+    
+    update_expr = "SET #st = :new_status, GSI2PK = :new_gsi2pk"
+    
+    if worker_id:
+        update_expr += ", workerId = :workerId"
+        expr_vals[":workerId"] = {"S": worker_id}
+    if driver_id:
+        update_expr += ", driverId = :driverId"
+        expr_vals[":driverId"] = {"S": driver_id}
+
+    transact_items = [
+        {
+            "Update": {
+                "TableName": config.DYNAMODB_TABLE,
+                "Key": {
+                    "PK": {"S": f"TENANT#{tenant_id}#ORDER#{order_id}"},
+                    "SK": {"S": "META"}
+                },
+                "UpdateExpression": update_expr,
+                "ConditionExpression": condition_expr,
+                "ExpressionAttributeNames": {"#st": "status"},
+                "ExpressionAttributeValues": expr_vals
+            }
+        }
+    ]
+    
+    # Audit Trail Record
+    audit_id = str(uuid.uuid4())
+    audit_item = {
+        "PK": {"S": f"TENANT#{tenant_id}#ORDER#{order_id}"},
+        "SK": {"S": f"AUDIT#{now}#{audit_id}"},
+        "entityType": {"S": "ORDER_AUDIT"},
+        "transition": {"S": transition},
+        "newState": {"S": new_state},
+        "actor": {"S": actor},
+        "timestamp": {"S": now}
+    }
+    if isinstance(expected_old_state, str):
+        audit_item["previousState"] = {"S": expected_old_state}
+    if worker_id:
+        audit_item["workerId"] = {"S": worker_id}
+    if driver_id:
+        audit_item["driverId"] = {"S": driver_id}
+        
+    transact_items.append({
+        "Put": {
+            "TableName": config.DYNAMODB_TABLE,
+            "Item": audit_item
+        }
+    })
+    
+    client = get_client()
+    client.transact_write_items(TransactItems=transact_items)
+    
+    # Publish Event
+    event_names = {
+        "CONFIRM": "OrderConfirmed",
+        "START_PREPARATION": "OrderPreparationStarted",
+        "COMPLETE_PREPARATION": "OrderPreparationCompleted",
+        "DISPATCH": "OrderDispatched",
+        "DELIVER": "OrderDelivered",
+        "CANCEL": "OrderCancelled"
+    }
+    
+    events.publish(
+        event_type=event_names[transition],
+        tenant_id=tenant_id,
+        source="wbos.orders",
+        data={
+            "orderId": order_id,
+            "previousState": expected_old_state if isinstance(expected_old_state, str) else "UNKNOWN",
+            "newState": new_state,
+            "actor": actor,
+            "workerId": worker_id,
+            "driverId": driver_id
+        }
+    )
+    
+    return {
+        "orderId": order_id,
+        "status": new_state,
+        "transition": transition
+    }

@@ -310,6 +310,35 @@ Resources:
             Path: /api/{proxy+}
             Method: options
 
+  OrderTransitionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.order_transition.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: !GetAtt WBOSEventBus.Arn
+      Events:
+        TransitionApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WBOSHttpApi
+            Path: /api/orders/{orderId}/transition
+            Method: post
+            Auth:
+              Authorizer: CognitoAuth
+        TransitionApiOptions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WBOSHttpApi
+            Path: /api/orders/{orderId}/transition
+            Method: options
+
   DashboardEventFunction:
     Type: AWS::Serverless::Function
     Properties:
