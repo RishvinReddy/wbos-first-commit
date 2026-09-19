@@ -94,17 +94,23 @@ def list_conversations(tenant_id: str):
     
     conversations = []
     for item in response.get("Items", []):
+        phone = item.get("customerPhone")
+        name = item.get("customerName", phone or "Unknown Customer")
         conversations.append({
-            "id": item.get("customerPhone"),
-            "customerPhone": item.get("customerPhone"),
-            "customerName": item.get("customerName"),
-            "lastMessage": item.get("lastMessage"),
-            "lastMessageAt": item.get("lastMessageAt"),
-            "unreadCount": int(item.get("unreadCount", 0))
+            "id": phone,
+            "customer": {
+                "id": phone,
+                "name": name,
+                "phone": phone,
+                "status": "Active"
+            },
+            "messages": [],
+            "unreadCount": int(item.get("unreadCount", 0)),
+            "updatedAt": item.get("lastMessageAt")
         })
         
-    # Sort by lastMessageAt descending
-    conversations.sort(key=lambda x: x["lastMessageAt"], reverse=True)
+    # Sort by updatedAt descending
+    conversations.sort(key=lambda x: x["updatedAt"] or "", reverse=True)
     return conversations
 
 def get_conversation_messages(tenant_id: str, customer_phone: str):
@@ -118,17 +124,28 @@ def get_conversation_messages(tenant_id: str, customer_phone: str):
     
     messages = []
     for item in response.get("Items", []):
+        status_val = item.get("status", "sent").lower()
+        if status_val == "received":
+            status_val = "read" # For inbound messages, no status icon usually, or read
+
         messages.append({
             "id": item.get("SK").split("#")[-1],
-            "direction": item.get("direction"),
-            "type": item.get("type"),
-            "text": item.get("text"),
+            "content": item.get("text"),
             "timestamp": item.get("timestamp"),
-            "status": item.get("status")
+            "sender": "wbos" if item.get("direction") == "OUTBOUND" else "customer",
+            "status": status_val
         })
         
+    # Sort messages chronologically
+    messages.sort(key=lambda x: x["timestamp"])
+
     return {
         "id": customer_phone,
-        "customerPhone": customer_phone,
+        "customer": {
+            "id": customer_phone,
+            "name": customer_phone,
+            "phone": customer_phone,
+            "status": "Active"
+        },
         "messages": messages
     }

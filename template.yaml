@@ -303,6 +303,12 @@ Resources:
             Method: any
             Auth:
               Authorizer: CognitoAuth
+        DashboardApiOptions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref WBOSHttpApi
+            Path: /api/{proxy+}
+            Method: options
 
   DashboardEventFunction:
     Type: AWS::Serverless::Function

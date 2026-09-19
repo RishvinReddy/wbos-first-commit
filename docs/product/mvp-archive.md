@@ -1,3 +1,11 @@
+# MVP Archive
+
+> Historical product planning document.
+> 
+> This document is retained for project history and may describe
+> capabilities or architecture that differ from the current
+> First Commit implementation.
+
 # WBOS v2 — First Commit MVP Scope & 3-Minute Demo Runbook
 
 ## 1. MVP Feature Scope
@@ -102,3 +110,4 @@ The First Commit rules specify strict 3-minute presentations. Every second count
 - [ ] EventBridge bus `wbos-events` with active rules for `OrderConfirmed` and `InvoiceGenerated`.
 - [ ] S3 bucket `wbos-invoices` accepting PDF write operations.
 - [ ] Meta WhatsApp credentials active (or simulator fallback active with 0 latency).
+
