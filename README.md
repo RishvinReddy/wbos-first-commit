@@ -95,7 +95,9 @@ DynamoDB
 | Generative AI models         | 🔵 Future  |
 | CRM                          | 🔵 Future  |
 | Marketing                    | 🔵 Future  |
-| Automation builder           | 🔵 Future  |
+| Automation builder           | 🟢 Live    |
+
+**Status:** Phase B implemented and deployed; live end-to-end automation verification completed for supported workflows.
 
 ✓ Real Meta WhatsApp webhook  
 ✓ HMAC webhook validation  

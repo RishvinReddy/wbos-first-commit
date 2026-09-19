@@ -278,8 +278,23 @@ Resources:
             Pattern:
               source:
                 - wbos.execution
+                - wbos.automations
               detail-type:
                 - CustomerReplyRequested
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+        OwnerNotificationRequestedEvent:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.automations
+              detail-type:
+                - OwnerNotificationRequested
             DeadLetterConfig:
               Arn: !GetAtt WBOSEventsDLQ.Arn
             RetryPolicy:
@@ -356,6 +371,45 @@ Resources:
               source:
                 - wbos.orders
                 - wbos.invoice
+            DeadLetterConfig:
+              Arn: !GetAtt WBOSEventsDLQ.Arn
+            RetryPolicy:
+              MaximumRetryAttempts: 2
+              MaximumEventAgeInSeconds: 3600
+
+  AutomationEngineFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers.automation_engine.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: !GetAtt WBOSEventBus.Arn
+      Events:
+        AutomationTriggers:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Ref WBOSEventBus
+            Pattern:
+              source:
+                - wbos.orders
+                - wbos.execution
+                - wbos.inventory
+              detail-type:
+                - OrderCreated
+                - OrderConfirmed
+                - OrderPreparationStarted
+                - OrderPreparationCompleted
+                - OrderDispatched
+                - OrderDelivered
+                - OrderCancelled
+                - MessageReceived
+                - InventoryLow
             DeadLetterConfig:
               Arn: !GetAtt WBOSEventsDLQ.Arn
             RetryPolicy:

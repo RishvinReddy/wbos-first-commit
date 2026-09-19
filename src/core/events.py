@@ -18,7 +18,7 @@ def get_events_client():
         _events_client = boto3.client("events", region_name=config.AWS_REGION)
     return _events_client
 
-def publish(event_type: str, tenant_id: str, data: Dict[str, Any], source: str):
+def publish(event_type: str, tenant_id: str, data: Dict[str, Any], source: str, automation_depth: int = 0):
     """
     Publishes an event to the WBOS EventBridge Event Bus.
     Constructs the standard Event Envelope.
@@ -33,6 +33,7 @@ def publish(event_type: str, tenant_id: str, data: Dict[str, Any], source: str):
         "tenantId": tenant_id,
         "timestamp": now,
         "source": source,
+        "automation_depth": automation_depth,
         "data": data
     }
 

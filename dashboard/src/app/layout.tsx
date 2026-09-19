@@ -46,6 +46,7 @@ const navGroups = [
       { href: "/orders", icon: ShoppingCart, label: "Orders" },
       { href: "/inventory", icon: Package, label: "Inventory" },
       { href: "/delivery", icon: Truck, label: "Delivery" },
+      { href: "/automations", icon: Zap, label: "Automations" },
     ]
   },
   {
