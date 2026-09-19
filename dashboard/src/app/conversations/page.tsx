@@ -15,6 +15,28 @@ export default function ConversationsPage() {
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [draftMessage, setDraftMessage] = useState('');
+
+  const handleSendMessage = () => {
+    if (!draftMessage.trim() || !selectedConversationId) return;
+    
+    // Optimistically update the UI since the backend route isn't built yet
+    const newMessage = {
+      id: Date.now().toString(),
+      content: draftMessage,
+      timestamp: new Date().toISOString(),
+      sender: 'wbos' as const,
+      status: 'sent' as const
+    };
+    
+    // Update local state temporarily
+    const conv = conversations.find(c => c.id === selectedConversationId);
+    if (conv) {
+      conv.messages.push(newMessage);
+    }
+    
+    setDraftMessage('');
+  };
 
   useEffect(() => {
     fetchOrders().then(setOrders).catch(console.error);
@@ -208,12 +230,17 @@ export default function ConversationsPage() {
                   <input 
                     type="text" 
                     placeholder="Type a message..." 
-                    className="w-full px-4 py-2 text-sm rounded-full outline-none border transition-colors disabled:opacity-50"
+                    value={draftMessage}
+                    onChange={(e) => setDraftMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="w-full px-4 py-2 text-sm rounded-full outline-none border transition-colors focus:ring-2 focus:ring-gray-200"
                     style={{ background: 'var(--wbos-bg)', borderColor: 'var(--wbos-border)', color: 'var(--wbos-ink)' }}
-                    disabled
                   />
                 </div>
-                <button className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors disabled:opacity-50" disabled>
+                <button 
+                  onClick={handleSendMessage}
+                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
@@ -263,10 +290,10 @@ export default function ConversationsPage() {
 
               <div className="mt-8 space-y-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--wbos-muted)' }}>Actions</h4>
-                <Button variant="outline" className="w-full justify-start text-sm h-9">View customer</Button>
-                <Button variant="outline" className="w-full justify-start text-sm h-9">View orders</Button>
-                <Button variant="outline" className="w-full justify-start text-sm h-9">Create order</Button>
-                <Button variant="outline" className="w-full justify-start text-sm h-9">Send invoice</Button>
+                <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => alert("Viewing customer profile coming soon!")}>View customer</Button>
+                <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => alert("Viewing all orders coming soon!")}>View orders</Button>
+                <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => alert("Order creation flow coming soon!")}>Create order</Button>
+                <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => alert("Invoice generation coming soon!")}>Send invoice</Button>
               </div>
             </div>
           </div>
