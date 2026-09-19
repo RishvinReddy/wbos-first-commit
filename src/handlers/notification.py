@@ -3,6 +3,7 @@ import json
 import logging
 import boto3
 from services.whatsapp import send_whatsapp_text_message
+from services.conversations import persist_outbound_message
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -17,26 +18,36 @@ def lambda_handler(event, context):
     event_type = detail.get("eventType")
     data = detail.get("data", {})
 
+    tenant_id = detail.get("tenantId")
+
     if event_type == "InvoiceGenerated":
         order_id = data.get("orderId")
         invoice_url = data.get("invoiceUrl")
         customer_phone = data.get("customerPhone")
 
-        if customer_phone:
+        if customer_phone and tenant_id:
             message = f"Your order {order_id} has been confirmed!\nDownload your invoice here: {invoice_url}"
-            send_whatsapp_text_message(customer_phone, message)
+            try:
+                send_whatsapp_text_message(customer_phone, message)
+                persist_outbound_message(tenant_id, customer_phone, message)
+            except Exception as e:
+                logger.error(f"Failed to send/persist WhatsApp message: {e}")
         else:
-            logger.warning(f"No customerPhone provided in InvoiceGenerated event for order {order_id}")
+            logger.warning(f"Missing customerPhone or tenantId in InvoiceGenerated event for order {order_id}")
 
     elif event_type == "OrderCreated":
         order_id = data.get("orderId")
         customer_phone = data.get("customerPhone")
 
-        if customer_phone:
+        if customer_phone and tenant_id:
             message = f"We have received your order {order_id}. We will process it shortly!"
-            send_whatsapp_text_message(customer_phone, message)
+            try:
+                send_whatsapp_text_message(customer_phone, message)
+                persist_outbound_message(tenant_id, customer_phone, message)
+            except Exception as e:
+                logger.error(f"Failed to send/persist WhatsApp message: {e}")
         else:
-            logger.warning(f"No customerPhone provided in OrderCreated event for order {order_id}")
+            logger.warning(f"Missing customerPhone or tenantId in OrderCreated event for order {order_id}")
 
     elif event_type == "LowStockDetected":
         # Alert the owner
@@ -46,9 +57,13 @@ def lambda_handler(event, context):
     elif event_type == "CustomerReplyRequested":
         customer_phone = data.get("customerPhone")
         message = data.get("message")
-        if customer_phone and message:
-            send_whatsapp_text_message(customer_phone, message)
+        if customer_phone and message and tenant_id:
+            try:
+                send_whatsapp_text_message(customer_phone, message)
+                persist_outbound_message(tenant_id, customer_phone, message)
+            except Exception as e:
+                logger.error(f"Failed to send/persist WhatsApp message: {e}")
         else:
-            logger.warning("Missing customerPhone or message in CustomerReplyRequested event")
+            logger.warning("Missing customerPhone, message, or tenantId in CustomerReplyRequested event")
 
     return {"status": "success"}

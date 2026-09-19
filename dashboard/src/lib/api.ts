@@ -1,4 +1,4 @@
-import { MetricsData, OrderData, ProductData, EventData, SimulatorResponse } from './types';
+import { MetricsData, OrderData, ProductData, EventData, SimulatorResponse, Conversation } from './types';
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api';
@@ -50,5 +50,25 @@ export async function fetchEvents(): Promise<EventData[]> {
         cache: 'no-store'
     });
     if (!res.ok) throw new Error('Failed to fetch events');
+    return res.json();
+}
+
+export async function fetchConversations(): Promise<{ conversations: Conversation[] }> {
+    const token = await getAuthToken();
+    const res = await fetch(`${API_URL}/conversations`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
+    });
+    if (!res.ok) throw new Error('Failed to fetch conversations');
+    return res.json();
+}
+
+export async function fetchConversationDetails(phone: string): Promise<{ conversation: Conversation }> {
+    const token = await getAuthToken();
+    const res = await fetch(`${API_URL}/conversations/${encodeURIComponent(phone)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
+    });
+    if (!res.ok) throw new Error('Failed to fetch conversation details');
     return res.json();
 }

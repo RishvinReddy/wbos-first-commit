@@ -36,3 +36,26 @@ export interface SimulatorResponse {
     result: any;
   }>;
 }
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  status: string;
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  timestamp: string;
+  sender: 'customer' | 'wbos';
+  status?: 'sent' | 'delivered' | 'read';
+}
+
+export interface Conversation {
+  id: string;
+  customer: Customer;
+  messages: Message[];
+  unreadCount: number;
+  updatedAt: string;
+}

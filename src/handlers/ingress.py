@@ -7,6 +7,7 @@ from security.webhook import verify_whatsapp_signature, InvalidSignatureError
 from core.auth import resolve_execution_context
 from core.config import config, get_meta_secrets
 from core.db import get_table
+from services.conversations import persist_inbound_message
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -96,6 +97,13 @@ def lambda_handler(event, context):
                                     continue
                                 else:
                                     raise
+
+                            # 4.5. Persist Conversation History
+                            try:
+                                persist_inbound_message(tenant_id, customer_phone, message_text, message_id)
+                            except Exception as e:
+                                logger.error(f"Failed to persist inbound message {message_id}: {e}")
+                                # Continue execution even if persistence fails to avoid dropping the webhook processing
 
                             # 5. Push to ExecutionQueue
                             queue_url = config.EXECUTION_QUEUE_URL

@@ -39,6 +39,9 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: wbos-dashboard-pool
+      MfaConfiguration: 'ON'
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: false
       AutoVerifiedAttributes:

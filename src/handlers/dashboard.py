@@ -1,6 +1,7 @@
 import json
 import logging
 import uuid
+import urllib.parse
 from core.auth import resolve_dashboard_context, resolve_execution_context, AccessDeniedError
 from core.execution import execute_message
 from services.analytics import get_daily_sales, get_sales_summary, get_pending_orders, get_low_stock_products
@@ -89,6 +90,18 @@ def lambda_handler(event, context):
                     "data": item.get("data", {})
                 })
 
+            return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
+
+        elif path == "/api/conversations":
+            from services.conversations import list_conversations
+            data = {"conversations": list_conversations(tenant_id)}
+            return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
+
+        elif path.startswith("/api/conversations/"):
+            conversation_id = path.split("/")[-1]
+            conversation_id = urllib.parse.unquote(conversation_id)
+            from services.conversations import get_conversation_messages
+            data = {"conversation": get_conversation_messages(tenant_id, conversation_id)}
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
 
         else:
