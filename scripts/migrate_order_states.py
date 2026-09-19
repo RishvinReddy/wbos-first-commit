@@ -51,10 +51,12 @@ def migrate_orders():
                 dynamodb.update_item(
                     TableName=table_name,
                     Key={"PK": {"S": pk}, "SK": {"S": sk}},
-                    UpdateExpression="SET #st = :new_status, GSI2PK = :new_gsi2pk, _migratedAt = :now, _migrationReason = :reason",
+                    UpdateExpression="SET #st = :new_status, GSI2PK = :new_gsi2pk, #migratedAt = :now, #migrationReason = :reason",
                     ConditionExpression="#st = :old_status",
                     ExpressionAttributeNames={
-                        "#st": "status"
+                        "#st": "status",
+                        "#migratedAt": "_migratedAt",
+                        "#migrationReason": "_migrationReason"
                     },
                     ExpressionAttributeValues={
                         ":new_status": {"S": "NEW"},
