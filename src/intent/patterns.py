@@ -29,12 +29,18 @@ INTENT_PATTERNS: List[Tuple[str, Intent, List[str], str]] = [
     # Product Lookup
     (r'(?i)(how much is|price of|cost of)\s+(.+)', Intent.PRODUCT_LOOKUP, ['product'], 'product_lookup'),
     
+    # Create Order (general, no product)
+    (r'(?i)^(place an order|order something|i want to order)$', Intent.CREATE_ORDER, [], 'create_order_general'),
+    
     # Create Order (with quantity)
-    (r'(?i)(i want|order|buy)\s+(\d+)\s*(?:packets?\s+of|pieces?\s+of|pcs?|units?)?\s+(.+)', Intent.CREATE_ORDER, ['quantity', 'product'], 'create_order_qty'),
+    (r'(?i)(i want|order|buy|place an order for)\s+(\d+)\s*(?:packets?\s+of|pieces?\s+of|pcs?|units?)?\s+(.+)', Intent.CREATE_ORDER, ['quantity', 'product'], 'create_order_qty'),
     
     # Create Order (without explicit quantity)
-    (r'(?i)(i want|order|buy)\s+(.+)', Intent.CREATE_ORDER, ['product'], 'create_order'),
+    (r'(?i)(i want|order|buy|place an order for)\s+(.+)', Intent.CREATE_ORDER, ['product'], 'create_order'),
     
     # Help
     (r'(?i)\b(help|what can you do|support)\b', Intent.HELP, [], 'help'),
+    
+    # Greeting
+    (r'(?i)^(hi|hello|hey|greetings)\b', Intent.GREETING, [], 'greeting'),
 ]

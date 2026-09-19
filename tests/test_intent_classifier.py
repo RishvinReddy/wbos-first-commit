@@ -55,9 +55,26 @@ class TestIntentClassifier(unittest.TestCase):
         res = self.classifier.classify("help")
         self.assertEqual(res.intent, Intent.HELP)
 
-    def test_unknown(self):
+    def test_greeting(self):
         res = self.classifier.classify("hello")
+        self.assertEqual(res.intent, Intent.GREETING)
+
+        res = self.classifier.classify("hi there")
+        self.assertEqual(res.intent, Intent.GREETING)
+
+    def test_unknown(self):
+        res = self.classifier.classify("what is the weather like?")
         self.assertEqual(res.intent, Intent.UNKNOWN)
+
+    def test_place_order_general(self):
+        res = self.classifier.classify("Place an order")
+        self.assertEqual(res.intent, Intent.CREATE_ORDER)
+        self.assertNotIn("product", res.entities)
+
+        res = self.classifier.classify("Place an order for 2 packets of rice")
+        self.assertEqual(res.intent, Intent.CREATE_ORDER)
+        self.assertEqual(res.entities.get("quantity"), "2")
+        self.assertEqual(res.entities.get("product"), "rice")
 
 if __name__ == '__main__':
     unittest.main()

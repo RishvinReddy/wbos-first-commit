@@ -115,7 +115,7 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
                 else:
                     reply_message = f"Sorry, I couldn't find a product matching '{product}'."
             else:
-                reply_message = "What would you like to order?"
+                reply_message = "Sure. What would you like to order?"
 
         elif result.intent == Intent.CANCEL_ORDER:
             order_id = result.entities.get("order_id")
@@ -129,6 +129,20 @@ def execute_message(context_obj, message_text: str, message_id: str, req_id: str
 
         elif result.intent == Intent.STORE_HOURS:
             reply_message = "Our store is open from 9:00 AM to 9:00 PM every day."
+
+        elif result.intent == Intent.GREETING:
+            reply_message = (
+                "Hi! Welcome to WBOS.\n\n"
+                "I can help you with:\n"
+                "• Track an order\n"
+                "• View order history\n"
+                "• Check product prices\n"
+                "• Check inventory\n"
+                "• Place an order\n"
+                "• Cancel an order\n"
+                "• Get an invoice\n\n"
+                "What would you like to do?"
+            )
 
         elif result.intent in (Intent.HELP, Intent.UNKNOWN):
             reply_message = (

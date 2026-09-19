@@ -11,4 +11,5 @@ class Intent(str, Enum):
     INVOICE_REQUEST = "INVOICE_REQUEST"
     STORE_HOURS = "STORE_HOURS"
     HELP = "HELP"
+    GREETING = "GREETING"
     UNKNOWN = "UNKNOWN"
