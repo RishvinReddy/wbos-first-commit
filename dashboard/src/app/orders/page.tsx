@@ -21,8 +21,10 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string }> = {
     PENDING: { bg: 'var(--warning-soft)', color: 'var(--warning)' },
+    PENDING: { bg: 'var(--warning-soft)', color: 'var(--warning)' },
     CONFIRMED: { bg: 'var(--success-soft)', color: 'var(--success)' },
     PREPARING: { bg: 'var(--info-soft)', color: 'var(--info)' },
+    READY: { bg: 'var(--success-soft)', color: 'var(--success)' },
     DELIVERY: { bg: 'var(--event-soft)', color: 'var(--event)' },
   };
   const { bg, color } = map[status] ?? { bg: 'var(--wbos-bg)', color: 'var(--wbos-muted)' };
@@ -49,7 +51,7 @@ function formatTime(dateStr: string) {
 }
 
 export default function OrdersPage() {
-  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] });
+  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[] });
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ export default function OrdersPage() {
     setLoading(true);
     fetchOrders().then((data) => {
       setAllOrders(data);
-      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], delivery: [] as any[] };
+      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[] };
       data.forEach((order: any) => {
         const status = (order.status || "PENDING").toUpperCase();
         const obj = {
@@ -67,11 +69,14 @@ export default function OrdersPage() {
           customer: DEMO_CUSTOMERS[order.customer] || order.customer,
           time: formatTime(order.createdAt),
           items: order.itemCount,
-          total: order.total
+          total: order.total,
+          workerId: order.workerId,
+          driverId: order.driverId
         };
         if (status === "CONFIRMED") newPipeline.confirmed.push(obj);
         else if (status === "PREPARING") newPipeline.preparing.push(obj);
-        else if (["READY", "DELIVERY"].includes(status)) newPipeline.delivery.push(obj);
+        else if (status === "READY") newPipeline.ready.push(obj);
+        else if (status === "DELIVERY") newPipeline.delivery.push(obj);
         else newPipeline.new.push(obj);
       });
       setPipeline(newPipeline);
@@ -90,6 +95,7 @@ export default function OrdersPage() {
     { key: "new", label: "New", count: pipeline.new.length, color: 'var(--warning)', bg: 'var(--warning-soft)', orders: pipeline.new, status: "PENDING" },
     { key: "confirmed", label: "Confirmed", count: pipeline.confirmed.length, color: 'var(--success)', bg: 'var(--success-soft)', orders: pipeline.confirmed, status: "CONFIRMED" },
     { key: "preparing", label: "Preparing", count: pipeline.preparing.length, color: 'var(--info)', bg: 'var(--info-soft)', orders: pipeline.preparing, status: "PREPARING" },
+    { key: "ready", label: "Ready", count: pipeline.ready.length, color: 'var(--success)', bg: 'var(--success-soft)', orders: pipeline.ready, status: "READY" },
     { key: "delivery", label: "Delivery", count: pipeline.delivery.length, color: 'var(--event)', bg: 'var(--event-soft)', orders: pipeline.delivery, status: "DELIVERY" },
   ];
 
@@ -106,8 +112,8 @@ export default function OrdersPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase"
-              style={{ background: 'var(--success-soft)', color: 'var(--success)' }}>
-              Auto-Confirm: ON
+              style={{ background: 'var(--wbos-surface)', color: 'var(--wbos-muted)', border: '1px solid var(--wbos-border)' }}>
+              Auto-Confirm: CONFIGURED
             </span>
             <span className="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase"
               style={{ background: 'var(--ai-soft)', color: 'var(--ai)' }}>
@@ -125,7 +131,7 @@ export default function OrdersPage() {
       )}
 
       <Section label="Kanban Pipeline">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[500px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 min-h-[500px]">
           {columns.map((col) => (
             <div key={col.key} className="flex flex-col rounded-xl border overflow-hidden"
               style={{ background: 'var(--wbos-surface)', borderColor: 'var(--wbos-border)', boxShadow: 'var(--shadow-card)' }}>
@@ -167,6 +173,15 @@ export default function OrdersPage() {
 
                     <div className="text-sm font-semibold mb-1" style={{ color: 'var(--wbos-ink)' }}>{order.customer}</div>
                     <div className="text-xs mb-3" style={{ color: 'var(--wbos-muted)' }}>{order.items} item(s)</div>
+
+                    {(order.workerId || order.driverId) && (
+                      <div className="mb-3 px-2 py-1.5 rounded bg-black/5 flex items-center gap-1.5">
+                        <span className="text-[10px]">👤</span>
+                        <span className="text-[10px] font-bold" style={{ color: 'var(--wbos-ink)' }}>
+                           {order.workerId || order.driverId}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-2 border-t"
                       style={{ borderColor: 'var(--wbos-border)' }}>
