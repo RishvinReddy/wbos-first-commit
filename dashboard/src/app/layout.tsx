@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import Link from "next/link";
 import AuthWrapper from "@/components/AuthWrapper";
 import ConfigureAmplifyClientSide from "@/components/ConfigureAmplifyClientSide";
+import Breadcrumb from "@/components/Breadcrumb";
 import {
   Activity,
   Package,
@@ -157,12 +158,7 @@ export default function RootLayout({
               boxShadow: 'var(--shadow-subtle)'
             }}>
 
-            <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--wbos-muted)' }}>
-              <Zap className="h-3.5 w-3.5" style={{ color: 'var(--wbos-green)' }} />
-              <span className="font-semibold" style={{ color: 'var(--wbos-ink-soft)' }}>WBOS</span>
-              <span>/</span>
-              <span className="font-medium">Overview</span>
-            </div>
+            <Breadcrumb />
 
             <div className="flex items-center gap-4">
               {/* AWS Status */}

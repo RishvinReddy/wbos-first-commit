@@ -9,6 +9,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
+const formatTime = (isoString?: string) => {
+  if (!isoString) return '';
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  } catch (e) {
+    return isoString;
+  }
+};
+
+const maskPhone = (phone?: string) => {
+  if (!phone) return '';
+  if (phone.length < 9) return phone;
+  return phone.substring(0, 9) + "•••••";
+};
+
 export default function ConversationsPage() {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const { conversations, isLoading } = useConversations(selectedConversationId);
@@ -32,8 +49,7 @@ export default function ConversationsPage() {
 
   const getCustomerLatestOrder = (customerId: string) => {
     // Basic heuristic: find most recent order for this customer name/id
-    // In a real app we'd map customerId directly to orders
-    const custOrders = orders.filter(o => o.customer.includes(customerId) || o.customer === 'John Doe'); // Fallback for demo UX logic
+    const custOrders = orders.filter(o => o.customer.includes(customerId));
     return custOrders.length > 0 ? custOrders[0] : null;
   };
 
@@ -120,7 +136,7 @@ export default function ConversationsPage() {
                       <div className="flex justify-between items-baseline mb-1">
                         <span className="font-semibold text-sm truncate" style={{ color: 'var(--wbos-ink)' }}>{conv.customer.name}</span>
                         <span className="text-[10px]" style={{ color: conv.unreadCount > 0 ? '#10b981' : 'var(--wbos-muted)' }}>
-                          {lastMsg?.timestamp || conv.updatedAt}
+                          {formatTime(lastMsg?.timestamp || conv.updatedAt)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -163,7 +179,7 @@ export default function ConversationsPage() {
                 </div>
                 <div>
                   <h2 className="font-semibold text-sm" style={{ color: 'var(--wbos-ink)' }}>{selectedConversation.customer.name}</h2>
-                  <p className="text-xs" style={{ color: 'var(--wbos-muted)' }}>{selectedConversation.customer.phone}</p>
+                  <p className="text-xs" style={{ color: 'var(--wbos-muted)' }}>{maskPhone(selectedConversation.customer.phone)}</p>
                 </div>
               </div>
 
@@ -184,7 +200,7 @@ export default function ConversationsPage() {
                         {msg.content}
                       </div>
                       <div className="flex items-center gap-1 mt-1">
-                        <span className="text-[10px]" style={{ color: 'var(--wbos-muted)' }}>{msg.timestamp}</span>
+                        <span className="text-[10px]" style={{ color: 'var(--wbos-muted)' }}>{formatTime(msg.timestamp)}</span>
                         {isWbos && msg.status && (
                           <span className="text-[10px]" style={{ color: msg.status === 'read' ? '#3b82f6' : 'var(--wbos-muted)' }}>
                             {msg.status === 'sent' ? <Check className="w-3 h-3" /> : <CheckCheck className="w-3 h-3" />}
@@ -229,7 +245,7 @@ export default function ConversationsPage() {
                 {selectedConversation.customer.name.charAt(0)}
               </div>
               <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--wbos-ink)' }}>{selectedConversation.customer.name}</h3>
-              <p className="text-sm font-medium mb-3" style={{ color: 'var(--wbos-muted)' }}>{selectedConversation.customer.phone}</p>
+              <p className="text-sm font-medium mb-3" style={{ color: 'var(--wbos-muted)' }}>{maskPhone(selectedConversation.customer.phone)}</p>
               <Badge variant="outline" className="text-[10px] uppercase tracking-wider">{selectedConversation.customer.status}</Badge>
             </div>
 
