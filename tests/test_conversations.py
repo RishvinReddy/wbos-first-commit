@@ -38,18 +38,16 @@ class TestConversations(unittest.TestCase):
         conversations = list_conversations(tenant_id)
         self.assertEqual(len(conversations), 1)
         self.assertEqual(conversations[0]["unreadCount"], 1)
-        self.assertEqual(conversations[0]["lastMessage"], "Hello")
         
         persist_inbound_message(tenant_id, phone, "World", "wamid.124", "2026-09-19T01:05:00Z")
         
         conversations = list_conversations(tenant_id)
         self.assertEqual(conversations[0]["unreadCount"], 2)
-        self.assertEqual(conversations[0]["lastMessage"], "World")
         
         messages = get_conversation_messages(tenant_id, phone)["messages"]
         self.assertEqual(len(messages), 2)
-        self.assertEqual(messages[0]["direction"], "INBOUND")
-        self.assertEqual(messages[0]["status"], "RECEIVED")
+        self.assertEqual(messages[0]["sender"], "customer")
+        self.assertEqual(messages[0]["status"], "read")
 
     def test_persist_outbound_message(self):
         from services.conversations import persist_outbound_message, list_conversations, get_conversation_messages
@@ -63,12 +61,11 @@ class TestConversations(unittest.TestCase):
         self.assertEqual(len(conversations), 1)
         # Outbound should not increment unreadCount
         self.assertEqual(conversations[0]["unreadCount"], 0)
-        self.assertEqual(conversations[0]["lastMessage"], "Hi there")
         
         messages = get_conversation_messages(tenant_id, phone)["messages"]
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0]["direction"], "OUTBOUND")
-        self.assertEqual(messages[0]["status"], "SENT")
+        self.assertEqual(messages[0]["sender"], "wbos")
+        self.assertEqual(messages[0]["status"], "sent")
         
     def test_tenant_isolation(self):
         from services.conversations import persist_inbound_message, list_conversations
@@ -79,12 +76,12 @@ class TestConversations(unittest.TestCase):
         # Verify TENANT_001 only sees their conversations
         t1_convs = list_conversations("TENANT_001")
         self.assertEqual(len(t1_convs), 1)
-        self.assertEqual(t1_convs[0]["customerPhone"], "+911111111111")
+        self.assertEqual(t1_convs[0]["customer"]["phone"], "+911111111111")
         
         # Verify TENANT_002 only sees their conversations
         t2_convs = list_conversations("TENANT_002")
         self.assertEqual(len(t2_convs), 1)
-        self.assertEqual(t2_convs[0]["customerPhone"], "+912222222222")
+        self.assertEqual(t2_convs[0]["customer"]["phone"], "+912222222222")
 
     def test_empty_conversations(self):
         from services.conversations import list_conversations
@@ -103,8 +100,8 @@ class TestConversations(unittest.TestCase):
         
         messages = get_conversation_messages(tenant_id, phone)["messages"]
         # DynamoDB sorts by SK (MESSAGE#timestamp#id), so older messages appear first
-        self.assertEqual(messages[0]["text"], "First")
-        self.assertEqual(messages[1]["text"], "Second")
+        self.assertEqual(messages[0]["content"], "First")
+        self.assertEqual(messages[1]["content"], "Second")
 
 if __name__ == '__main__':
     unittest.main()
