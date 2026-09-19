@@ -21,7 +21,6 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string }> = {
     PENDING: { bg: 'var(--warning-soft)', color: 'var(--warning)' },
-    PENDING: { bg: 'var(--warning-soft)', color: 'var(--warning)' },
     CONFIRMED: { bg: 'var(--success-soft)', color: 'var(--success)' },
     PREPARING: { bg: 'var(--info-soft)', color: 'var(--info)' },
     READY: { bg: 'var(--success-soft)', color: 'var(--success)' },
