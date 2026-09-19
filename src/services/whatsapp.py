@@ -45,7 +45,11 @@ def send_whatsapp_text_message(to_phone: str, text: str):
         with urllib.request.urlopen(req) as response:
             res_body = response.read()
             logger.info(f"Successfully sent WhatsApp message to {to_phone}. Response: {res_body}")
-            return True
+            body_json = json.loads(res_body)
+            messages = body_json.get("messages", [])
+            if messages and "id" in messages[0]:
+                return messages[0]["id"]
+            return None
     except Exception as e:
         logger.error(f"Failed to send WhatsApp message: {e}")
-        return False
+        return None

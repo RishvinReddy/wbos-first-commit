@@ -7,7 +7,7 @@ from security.webhook import verify_whatsapp_signature, InvalidSignatureError
 from core.auth import resolve_execution_context
 from core.config import config, get_meta_secrets
 from core.db import get_table
-from services.conversations import persist_inbound_message
+from services.conversations import persist_inbound_message, update_message_status_by_meta_id
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -124,6 +124,34 @@ def lambda_handler(event, context):
                                 logger.info(f"Message {message_id} queued for execution")
                             else:
                                 logger.warning("EXECUTION_QUEUE_URL not set")
+
+                # Check if it is a status event
+                if "statuses" in value:
+                    for status in value["statuses"]:
+                        try:
+                            customer_phone = "+" + status.get("recipient_id", "")
+                            meta_message_id = status.get("id")
+                            msg_status = status.get("status", "").upper()
+                            
+                            error_info = None
+                            if "errors" in status and status["errors"]:
+                                err = status["errors"][0]
+                                error_info = {
+                                    "code": err.get("code"),
+                                    "title": err.get("title", err.get("message"))
+                                }
+                                
+                            context_obj = resolve_execution_context(customer_phone)
+                            
+                            update_message_status_by_meta_id(
+                                context_obj.tenant_id, 
+                                customer_phone, 
+                                meta_message_id, 
+                                msg_status,
+                                error_info
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to process status update {status}: {e}")
 
         # Return 200 OK to Meta to acknowledge receipt immediately
         return {

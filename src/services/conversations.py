@@ -57,7 +57,7 @@ def persist_inbound_message(tenant_id: str, customer_phone: str, text: str, mess
     # 2. Update conversation summary
     _update_conversation_record(tenant_id, customer_phone, text, timestamp, "INBOUND")
     
-def persist_outbound_message(tenant_id: str, customer_phone: str, text: str, timestamp: str = None):
+def persist_outbound_message(tenant_id: str, customer_phone: str, text: str, meta_message_id: str = None, timestamp: str = None):
     """
     Persists an outbound message and updates the conversation summary.
     """
@@ -68,17 +68,19 @@ def persist_outbound_message(tenant_id: str, customer_phone: str, text: str, tim
     table = get_table()
     
     # 1. Put message record
-    table.put_item(
-        Item={
-            "PK": f"TENANT#{tenant_id}#CONVERSATION#{customer_phone}",
-            "SK": f"MESSAGE#{timestamp}#{message_id}",
-            "direction": "OUTBOUND",
-            "type": "text",
-            "text": text,
-            "timestamp": timestamp,
-            "status": "SENT"
-        }
-    )
+    item = {
+        "PK": f"TENANT#{tenant_id}#CONVERSATION#{customer_phone}",
+        "SK": f"MESSAGE#{timestamp}#{message_id}",
+        "direction": "OUTBOUND",
+        "type": "text",
+        "text": text,
+        "timestamp": timestamp,
+        "status": "SENT"
+    }
+    if meta_message_id:
+        item["metaMessageId"] = meta_message_id
+        
+    table.put_item(Item=item)
     
     # 2. Update conversation summary
     _update_conversation_record(tenant_id, customer_phone, text, timestamp, "OUTBOUND")
@@ -133,7 +135,9 @@ def get_conversation_messages(tenant_id: str, customer_phone: str):
             "content": item.get("text"),
             "timestamp": item.get("timestamp"),
             "sender": "wbos" if item.get("direction") == "OUTBOUND" else "customer",
-            "status": status_val
+            "status": status_val,
+            "errorTitle": item.get("metaErrorTitle"),
+            "errorCode": item.get("metaErrorCode")
         })
         
     # Sort messages chronologically
@@ -149,3 +153,56 @@ def get_conversation_messages(tenant_id: str, customer_phone: str):
         },
         "messages": messages
     }
+
+def update_message_status_by_meta_id(tenant_id: str, customer_phone: str, meta_message_id: str, new_status: str, error_info: dict = None):
+    """
+    Updates an outbound message's status monotonically using its Meta wamid.
+    """
+    import boto3
+    table = get_table()
+    
+    # Query for the message by metaMessageId using FilterExpression
+    response = table.query(
+        KeyConditionExpression=Key("PK").eq(f"TENANT#{tenant_id}#CONVERSATION#{customer_phone}") & Key("SK").begins_with("MESSAGE#"),
+        FilterExpression=boto3.dynamodb.conditions.Attr("metaMessageId").eq(meta_message_id)
+    )
+    items = response.get("Items", [])
+    if not items:
+        logger.warning(f"Message with metaMessageId {meta_message_id} not found.")
+        return
+        
+    msg = items[0]
+    current_status = msg.get("status", "SENT")
+    
+    status_rank = {"SENT": 1, "DELIVERED": 2, "READ": 3, "FAILED": 99}
+    curr_rank = status_rank.get(current_status, 0)
+    new_rank = status_rank.get(new_status, 0)
+    
+    # Only advance if new_rank > curr_rank or if it's FAILED. 
+    # If it's already FAILED, we might just be getting another update, ignore it unless it's new error info.
+    if new_rank <= curr_rank and new_status != "FAILED":
+        logger.info(f"Ignoring out-of-order status {new_status} for {meta_message_id} (current: {current_status})")
+        return
+        
+    update_expr = "SET #st = :st, statusUpdatedAt = :ts"
+    expr_names = {"#st": "status"}
+    expr_vals = {
+        ":st": new_status,
+        ":ts": datetime.datetime.now(datetime.UTC).isoformat() + "Z"
+    }
+    
+    if new_status == "FAILED" and error_info:
+        update_expr += ", metaErrorCode = :ec, metaErrorTitle = :et"
+        expr_vals[":ec"] = error_info.get("code")
+        expr_vals[":et"] = error_info.get("title")
+        
+    table.update_item(
+        Key={
+            "PK": msg["PK"],
+            "SK": msg["SK"]
+        },
+        UpdateExpression=update_expr,
+        ExpressionAttributeNames=expr_names,
+        ExpressionAttributeValues=expr_vals
+    )
+    logger.info(f"Updated status of {meta_message_id} to {new_status}")

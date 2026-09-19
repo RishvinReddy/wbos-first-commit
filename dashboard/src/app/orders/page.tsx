@@ -49,7 +49,7 @@ function formatTime(dateStr: string) {
 }
 
 export default function OrdersPage() {
-  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[] });
+  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[], delivered: [] as any[] });
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +72,7 @@ export default function OrdersPage() {
     setLoading(true);
     fetchOrders().then((data) => {
       setAllOrders(data);
-      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[] };
+      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[], delivered: [] as any[] };
       data.forEach((order: any) => {
         const status = (order.status || "PENDING").toUpperCase();
         const obj = {
@@ -89,6 +89,7 @@ export default function OrdersPage() {
         else if (status === "PREPARING") newPipeline.preparing.push(obj);
         else if (status === "READY") newPipeline.ready.push(obj);
         else if (status === "DELIVERY") newPipeline.delivery.push(obj);
+        else if (status === "DELIVERED") newPipeline.delivered.push(obj);
         else newPipeline.new.push(obj);
       });
       setPipeline(newPipeline);
@@ -109,13 +110,15 @@ export default function OrdersPage() {
     { key: "preparing", label: "Preparing", count: pipeline.preparing.length, color: 'var(--info)', bg: 'var(--info-soft)', orders: pipeline.preparing, status: "PREPARING" },
     { key: "ready", label: "Ready", count: pipeline.ready.length, color: 'var(--success)', bg: 'var(--success-soft)', orders: pipeline.ready, status: "READY" },
     { key: "delivery", label: "Delivery", count: pipeline.delivery.length, color: 'var(--event)', bg: 'var(--event-soft)', orders: pipeline.delivery, status: "DELIVERY" },
+    { key: "delivered", label: "Delivered", count: pipeline.delivered.length, color: 'var(--success)', bg: 'var(--success-soft)', orders: pipeline.delivered, status: "DELIVERED" },
   ];
 
-  const dragTransitions: Record<string, { transition: "CONFIRM" | "START_PREPARATION" | "COMPLETE_PREPARATION" | "DISPATCH"; role?: "PACKER" | "DELIVERY_DRIVER" }> = {
+  const dragTransitions: Record<string, { transition: "CONFIRM" | "START_PREPARATION" | "COMPLETE_PREPARATION" | "DISPATCH" | "DELIVER"; role?: "PACKER" | "DELIVERY_DRIVER" }> = {
     "NEW->CONFIRMED": { transition: "CONFIRM" },
     "CONFIRMED->PREPARING": { transition: "START_PREPARATION", role: "PACKER" },
     "PREPARING->READY": { transition: "COMPLETE_PREPARATION" },
     "READY->DELIVERY": { transition: "DISPATCH", role: "DELIVERY_DRIVER" },
+    "DELIVERY->DELIVERED": { transition: "DELIVER" },
   };
 
   const getDragTransition = (from: string | null, to: string) => {
@@ -237,7 +240,7 @@ export default function OrdersPage() {
       )}
 
       <Section label="Kanban Pipeline">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 min-h-[500px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 min-h-[500px] overflow-x-auto pb-4">
           {columns.map((col) => {
             const validDropTarget = canDropOn(col.status);
             return (

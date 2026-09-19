@@ -49,7 +49,9 @@ export interface Message {
   content: string;
   timestamp: string;
   sender: 'customer' | 'wbos';
-  status?: 'sent' | 'delivered' | 'read';
+  status?: string;
+  errorTitle?: string;
+  errorCode?: number | string;
 }
 
 export interface Conversation {

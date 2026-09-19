@@ -28,8 +28,10 @@ def lambda_handler(event, context):
         if customer_phone and tenant_id:
             message = f"Your order {order_id} has been confirmed!\nDownload your invoice here: {invoice_url}"
             try:
-                send_whatsapp_text_message(customer_phone, message)
-                persist_outbound_message(tenant_id, customer_phone, message)
+                wamid = send_whatsapp_text_message(customer_phone, message)
+                if not wamid:
+                    raise RuntimeError("Meta WhatsApp API rejected the outbound message")
+                persist_outbound_message(tenant_id, customer_phone, message, wamid)
             except Exception as e:
                 logger.error(f"Failed to send/persist WhatsApp message: {e}")
         else:
@@ -42,8 +44,10 @@ def lambda_handler(event, context):
         if customer_phone and tenant_id:
             message = f"We have received your order {order_id}. We will process it shortly!"
             try:
-                send_whatsapp_text_message(customer_phone, message)
-                persist_outbound_message(tenant_id, customer_phone, message)
+                wamid = send_whatsapp_text_message(customer_phone, message)
+                if not wamid:
+                    raise RuntimeError("Meta WhatsApp API rejected the outbound message")
+                persist_outbound_message(tenant_id, customer_phone, message, wamid)
             except Exception as e:
                 logger.error(f"Failed to send/persist WhatsApp message: {e}")
         else:
@@ -57,13 +61,40 @@ def lambda_handler(event, context):
     elif event_type == "CustomerReplyRequested":
         customer_phone = data.get("customerPhone")
         message = data.get("message")
+
         if customer_phone and message and tenant_id:
             try:
-                send_whatsapp_text_message(customer_phone, message)
-                persist_outbound_message(tenant_id, customer_phone, message)
+                wamid = send_whatsapp_text_message(
+                    customer_phone,
+                    message
+                )
+
+                if not wamid:
+                    raise RuntimeError(
+                        "Meta WhatsApp API rejected the outbound message"
+                    )
+
+                persist_outbound_message(
+                    tenant_id,
+                    customer_phone,
+                    message,
+                    wamid
+                )
+
+                logger.info(
+                    f"Outbound WhatsApp message persisted for {customer_phone}"
+                )
+
             except Exception as e:
-                logger.error(f"Failed to send/persist WhatsApp message: {e}")
+                logger.error(
+                    f"Failed to send/persist WhatsApp message: {e}"
+                )
+                raise
+
         else:
-            logger.warning("Missing customerPhone, message, or tenantId in CustomerReplyRequested event")
+            logger.warning(
+                "Missing customerPhone, message, or tenantId "
+                "in CustomerReplyRequested event"
+            )
 
     return {"status": "success"}

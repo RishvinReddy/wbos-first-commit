@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, Send, Paperclip, Smile, Check, CheckCheck, User, Package, Phone, Clock } from 'lucide-react';
+import { Search, Send, Paperclip, Smile, Check, CheckCheck, User, Package, Phone, Clock, AlertCircle } from 'lucide-react';
 import { useConversations } from '@/lib/conversationAdapter';
 import { fetchOrders } from '@/lib/api';
 import { OrderData, Conversation } from '@/lib/types';
@@ -202,8 +202,18 @@ export default function ConversationsPage() {
                       <div className="flex items-center gap-1 mt-1">
                         <span className="text-[10px]" style={{ color: 'var(--wbos-muted)' }}>{formatTime(msg.timestamp)}</span>
                         {isWbos && msg.status && (
-                          <span className="text-[10px]" style={{ color: msg.status === 'read' ? '#3b82f6' : 'var(--wbos-muted)' }}>
-                            {msg.status === 'sent' ? <Check className="w-3 h-3" /> : <CheckCheck className="w-3 h-3" />}
+                          <span 
+                            className="text-[10px] flex items-center gap-1" 
+                            style={{ 
+                              color: msg.status.toLowerCase() === 'failed' ? '#ef4444' 
+                                   : msg.status.toLowerCase() === 'read' ? '#3b82f6' 
+                                   : 'var(--wbos-muted)' 
+                            }}
+                            title={msg.errorTitle ? `${msg.errorTitle} (${msg.errorCode})` : undefined}
+                          >
+                            {msg.status.toLowerCase() === 'failed' && <><AlertCircle className="w-3 h-3" /> Failed</>}
+                            {msg.status.toLowerCase() === 'sent' && <Check className="w-3 h-3" />}
+                            {(msg.status.toLowerCase() === 'delivered' || msg.status.toLowerCase() === 'read') && <CheckCheck className="w-3 h-3" />}
                           </span>
                         )}
                       </div>

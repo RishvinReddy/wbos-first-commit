@@ -237,6 +237,8 @@ Resources:
       CodeUri: src/
       Handler: handlers.notification.lambda_handler
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WBOSStoreTable
         - Statement:
             - Effect: Allow
               Action:
