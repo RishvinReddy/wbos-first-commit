@@ -29,14 +29,23 @@ INTENT_PATTERNS: List[Tuple[str, Intent, List[str], str]] = [
     # Product Lookup
     (r'(?i)(how much is|price of|cost of)\s+(.+)', Intent.PRODUCT_LOOKUP, ['product'], 'product_lookup'),
     
+    # Menu Selection
+    (r'(?i)^()(\d+)$', Intent.MENU_SELECTION, ['option'], 'menu_selection'),
+
+    # Catalog
+    (r'(?i)^(what do you have\??|give me all items|show me all products|show products|catalog|view catalog)$', Intent.CATALOG, [], 'catalog'),
+
     # Create Order (general, no product)
     (r'(?i)^(place an order|order something|i want to order)$', Intent.CREATE_ORDER, [], 'create_order_general'),
     
-    # Create Order (with quantity)
-    (r'(?i)(i want|order|buy|place an order for)\s+(\d+)\s*(?:packets?\s+of|pieces?\s+of|pcs?|units?)?\s+(.+)', Intent.CREATE_ORDER, ['quantity', 'product'], 'create_order_qty'),
+    # Create Order: Quantity first (e.g. "I want 2 packets of Maggie noodles" or "2 Maggie noodles")
+    (r'(?i)^(i want|order|buy|place an order for)?\s*(\d+)\s*(?:packets?\s+of|pieces?\s+of|pcs?\s+of|units?\s+of|packets?|pieces?|pcs?|units?)?\s+(.+)$', Intent.CREATE_ORDER, ['quantity', 'product'], 'create_order_quantity_first'),
+
+    # Create Order: Product first (e.g. "Maggie noodles 2 packets")
+    (r'(?i)^()(.+?)\s+(\d+)\s*(?:packets?|pieces?|pcs?|units?)?$', Intent.CREATE_ORDER, ['product', 'quantity'], 'create_order_product_first'),
     
     # Create Order (without explicit quantity)
-    (r'(?i)(i want|order|buy|place an order for)\s+(.+)', Intent.CREATE_ORDER, ['product'], 'create_order'),
+    (r'(?i)^(i want|order|buy|place an order for)\s+(.+)$', Intent.CREATE_ORDER, ['product'], 'create_order'),
     
     # Help
     (r'(?i)\b(help|what can you do|support)\b', Intent.HELP, [], 'help'),

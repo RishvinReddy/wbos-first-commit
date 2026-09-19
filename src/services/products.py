@@ -75,3 +75,32 @@ def check_inventory(tenant_id: str, product_ids: list[str]):
         }
         for item in items
     ]
+
+def list_products(tenant_id: str, limit: int = 50):
+    """
+    Retrieve the product catalog for a tenant.
+    For this MVP, we use a tenant-scoped scan.
+    """
+    table = get_table()
+    
+    response = table.scan(
+        FilterExpression=Attr("tenantId").eq(tenant_id) & Attr("entityType").eq("PRODUCT")
+    )
+    items = response.get("Items", [])
+    
+    products = []
+    for item in items:
+        products.append({
+            "productId": item.get("productId"),
+            "name": item.get("name"),
+            "price": float(item.get("price", 0)),
+            "stock": int(item.get("stock", 0)),
+            "unit": item.get("unit", "")
+        })
+        if len(products) >= limit:
+            break
+            
+    # Sort alphabetically by name
+    products.sort(key=lambda x: x.get("name", ""))
+    
+    return products
