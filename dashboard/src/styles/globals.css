@@ -245,3 +245,142 @@
   font-family: inherit;
 }
 
+
+
+/* WBOS Premium Authentication Shell */
+.wbos-auth-shell {
+  --amplify-colors-brand-primary-10: #e7f3f5;
+  --amplify-colors-brand-primary-80: #0F8A9A;
+  --amplify-colors-brand-primary-90: #0c6e7b;
+  --amplify-colors-brand-primary-100: #09535c;
+}
+
+/* Card Container */
+.wbos-auth-form-card {
+  background: #FFFFFF;
+  border: 1px solid #E4E7EC;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.06);
+  border-radius: 12px;
+  padding: 48px;
+}
+
+@media (max-width: 640px) {
+  .wbos-auth-form-card {
+    padding: 32px;
+  }
+}
+
+/* Form Fields */
+.wbos-auth-shell .amplify-flex {
+  gap: 20px; /* Input to next field */
+}
+
+/* Field Group */
+.wbos-auth-shell .amplify-field {
+  gap: 8px; /* Label to input */
+}
+
+/* Labels */
+.wbos-auth-shell .amplify-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+}
+
+/* Inputs */
+.wbos-auth-shell .amplify-input {
+  height: 52px;
+  border-radius: 8px;
+  border: 1px solid #D8DEE7;
+  background: #FFFFFF;
+  color: #111827;
+  font-size: 15px;
+  padding: 0 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.wbos-auth-shell .amplify-input:focus,
+.wbos-auth-shell .amplify-input:focus-within {
+  border-color: #0F8A9A;
+  box-shadow: 0 0 0 3px rgba(15, 138, 154, 0.10);
+  outline: none;
+}
+
+/* Password Visibility Toggle */
+.wbos-auth-shell .amplify-field-group__control {
+  align-items: stretch;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="primary"] {
+  background-color: #0F8A9A;
+  color: white;
+  height: 52px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s ease;
+  margin-top: 8px; /* Form to button */
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.wbos-auth-shell .amplify-button[data-variation="primary"]:hover {
+  background-color: #0c6e7b;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="primary"]:active {
+  transform: translateY(1px);
+}
+
+/* Password Show/Hide Button */
+.wbos-auth-shell .amplify-field-group__control .amplify-button {
+  border-radius: 0 8px 8px 0;
+  border: 1px solid #D8DEE7;
+  border-left: 1px solid #E4E7EC; /* subtle left border */
+  background: transparent;
+  color: #667085;
+  height: 52px;
+  width: 52px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wbos-auth-shell .amplify-field-group__control .amplify-button:hover {
+  background: #F9FAFB;
+}
+
+/* Forgot Password Link */
+.wbos-auth-shell .amplify-button[data-variation="link"] {
+  color: #0F8A9A;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0;
+  background: transparent;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="link"]:hover {
+  color: #0c6e7b;
+  text-decoration: underline;
+  background: transparent;
+}
+
+/* Hide Amplify's default Tabs if visible */
+.wbos-auth-shell .amplify-tabs {
+  display: none;
+}
+
+/* Alert/Errors */
+.wbos-auth-shell .amplify-alert {
+  background-color: #FEF3F2;
+  border: 1px solid #FEE4E2;
+  border-radius: 8px;
+  color: #B42318;
+}
+
+.wbos-auth-shell .amplify-alert__icon {
+  color: #D92D20;
+}
