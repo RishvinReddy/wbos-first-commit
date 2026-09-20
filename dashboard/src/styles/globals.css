@@ -253,6 +253,9 @@
   --amplify-colors-brand-primary-80: #0F8A9A;
   --amplify-colors-brand-primary-90: #0c6e7b;
   --amplify-colors-brand-primary-100: #09535c;
+  --amplify-components-authenticator-router-box-shadow: none;
+  --amplify-components-authenticator-router-border-width: 0;
+  --amplify-components-authenticator-router-background-color: transparent;
 }
 
 /* Card Container */
@@ -268,6 +271,22 @@
   .wbos-auth-form-card {
     padding: 32px;
   }
+}
+
+/* Force strip Amplify's inner card styling */
+.wbos-auth-shell [data-amplify-authenticator],
+.wbos-auth-shell [data-amplify-router] {
+  box-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 100% !important;
+}
+
+.wbos-auth-shell .amplify-router-content {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Form Fields */
@@ -352,7 +371,7 @@
   background: #F9FAFB;
 }
 
-/* Forgot Password Link */
+/* Forgot Password Link - Make sure it's visible and styled */
 .wbos-auth-shell .amplify-button[data-variation="link"] {
   color: #0F8A9A;
   font-size: 13px;
@@ -360,6 +379,8 @@
   text-decoration: none;
   padding: 0;
   background: transparent;
+  display: inline-block;
+  margin-top: 4px;
 }
 
 .wbos-auth-shell .amplify-button[data-variation="link"]:hover {
