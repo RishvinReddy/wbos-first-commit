@@ -5,36 +5,36 @@ import '@aws-amplify/ui-react/styles.css';
 
 function AuthHeader({ title, subtitle }: { title: string, subtitle: string }) {
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2 mb-8">
-        <img src="/wbos-logo.png" alt="WBOS" className="w-5 h-5 object-contain" />
+    <div style={{ marginBottom: '30px' }}>
+      <div className="flex items-center gap-3" style={{ marginBottom: '44px' }}>
+        <img src="/wbos-logo.png" alt="WBOS" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
         <div className="leading-none text-left mt-0.5">
-          <div className="font-extrabold text-[11px] tracking-tight text-[#111827]">WBOS</div>
-          <div className="text-[6px] font-bold uppercase tracking-widest text-[#667085] mt-0.5">Business Operations System</div>
+          <div style={{ fontWeight: 700, fontSize: '14px', letterSpacing: '0', color: '#111827' }}>WBOS</div>
+          <div style={{ fontWeight: 700, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#667085', marginTop: '2px' }}>Business Operations System</div>
         </div>
       </div>
-      <h2 className="text-[36px] font-[650] text-[#111827] tracking-tight mb-2.5 leading-tight" style={{ letterSpacing: '-0.025em' }}>{title}</h2>
-      <p className="text-[15px] text-[#667085] font-medium leading-[1.6]">{subtitle}</p>
+      <h2 style={{ fontSize: 'clamp(32px, 3vw, 40px)', fontWeight: 700, lineHeight: 1.08, letterSpacing: '-0.03em', color: '#101828', marginBottom: '10px' }}>{title}</h2>
+      <p style={{ fontSize: '15px', lineHeight: 1.55, color: '#667085', margin: 0 }}>{subtitle}</p>
     </div>
   );
 }
 
 function AuthFooter() {
   return (
-    <div className="mt-8">
-      <div className="border-t border-[#E4E7EC] pt-7 mb-7">
+    <div style={{ marginTop: '28px' }}>
+      <div style={{ borderTop: '1px solid #EAECF0', paddingTop: '24px', marginBottom: '28px' }}>
         <div className="flex items-start gap-2.5">
-           <div className="w-1.5 h-1.5 rounded-full bg-[#0F8A9A] mt-1.5 shrink-0"></div>
+           <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0F8A9A', marginTop: '6px', flexShrink: 0 }}></div>
            <div>
-             <div className="text-[13px] font-bold text-[#111827] mb-0.5">Secure workspace access</div>
-             <div className="text-[13px] font-medium text-[#667085]">Protected by Amazon Cognito · MFA enabled</div>
+             <div style={{ fontSize: '13px', fontWeight: 650, color: '#344054', marginBottom: '2px' }}>Secure workspace access</div>
+             <div style={{ fontSize: '12px', color: '#667085' }}>Protected by Amazon Cognito · MFA enabled</div>
            </div>
         </div>
       </div>
       
-      <div className="text-[10px] font-bold text-[#667085] uppercase tracking-widest flex flex-col gap-1">
-        <div className="text-[#111827]">WBOS · BUSINESS OPERATIONS SYSTEM</div>
-        <div className="opacity-70">AWS-NATIVE · EVENT-DRIVEN · WHATSAPP-FIRST</div>
+      <div>
+        <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#344054', marginBottom: '8px' }}>WBOS · BUSINESS OPERATIONS SYSTEM</div>
+        <div style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.08em', color: '#98A2B3' }}>AWS-NATIVE · EVENT-DRIVEN · WHATSAPP-FIRST</div>
       </div>
     </div>
   );
@@ -75,74 +75,88 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
   if (authStatus === 'authenticated') return <>{children}</>;
 
   return (
-    <div className="flex h-screen w-full bg-[#F6F7F9]">
+    <div className="auth-page-root">
       {/* Left Panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[45%] max-w-[600px] bg-white border-r border-[#D8DEE7] p-12 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{ backgroundImage: 'linear-gradient(#111827 1px, transparent 1px), linear-gradient(90deg, #111827 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+      <div className="hidden lg:flex flex-col bg-[#FFFFFF] border-r border-[#D8DEE7] relative overflow-hidden" 
+           style={{ paddingTop: '64px', paddingBottom: '48px', paddingLeft: 'clamp(32px, 5vw, 72px)', paddingRight: 'clamp(32px, 5vw, 72px)' }}>
+        
+        {/* Grid Background */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
         </div>
-        <div className="relative z-10 flex items-center gap-3">
-          <img src="/wbos-logo.png" alt="WBOS" className="w-8 h-8 object-contain" />
-          <div className="leading-none mt-1">
-            <div className="font-extrabold text-xl tracking-tight text-[#111827]">WBOS</div>
-            <div className="text-[9px] font-bold uppercase tracking-widest text-[#667085] mt-0.5">Business Operations System</div>
-          </div>
-        </div>
-        <div className="relative z-10 my-16">
-          <h1 className="text-[40px] leading-[1.1] font-extrabold text-[#111827] tracking-tight mb-6">Run your business from one operational layer.</h1>
-          <p className="text-lg text-[#667085] font-medium mb-12 max-w-[400px]">Connect conversations, orders, inventory and automation through one AWS-powered control center.</p>
-          <div className="space-y-8">
-            <div className="flex gap-4">
-              <div className="text-xs font-bold text-[#0F8A9A] w-6 shrink-0 pt-0.5">01</div>
-              <div>
-                <h3 className="text-sm font-bold text-[#111827] mb-1">Conversations</h3>
-                <p className="text-sm text-[#667085] font-medium">Customer communication through WhatsApp</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="text-xs font-bold text-[#0F8A9A] w-6 shrink-0 pt-0.5">02</div>
-              <div>
-                <h3 className="text-sm font-bold text-[#111827] mb-1">Orders</h3>
-                <p className="text-sm text-[#667085] font-medium">Control the fulfillment lifecycle</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="text-xs font-bold text-[#0F8A9A] w-6 shrink-0 pt-0.5">03</div>
-              <div>
-                <h3 className="text-sm font-bold text-[#111827] mb-1">Inventory</h3>
-                <p className="text-sm text-[#667085] font-medium">Track stock in real time</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="text-xs font-bold text-[#0F8A9A] w-6 shrink-0 pt-0.5">04</div>
-              <div>
-                <h3 className="text-sm font-bold text-[#111827] mb-1">Automation</h3>
-                <p className="text-sm text-[#667085] font-medium">Respond to operational events automatically</p>
-              </div>
+
+        <div className="relative z-10 w-full mx-auto flex flex-col h-full justify-between" style={{ maxWidth: '570px' }}>
+          
+          <div className="flex items-center gap-3">
+            <img src="/wbos-logo.png" alt="WBOS" className="object-contain" style={{ width: '32px', height: '32px' }} />
+            <div className="leading-none mt-1">
+              <div style={{ fontWeight: 800, fontSize: '20px', letterSpacing: '-0.02em', color: '#111827' }}>WBOS</div>
+              <div style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#667085', marginTop: '2px' }}>Business Operations System</div>
             </div>
           </div>
-        </div>
-        <div className="relative z-10">
-          <div className="text-[10px] font-bold text-[#667085] tracking-widest flex items-center gap-3">
-            <span>AWS-NATIVE</span><span className="w-1 h-1 rounded-full bg-[#D8DEE7]"></span>
-            <span>EVENT-DRIVEN</span><span className="w-1 h-1 rounded-full bg-[#D8DEE7]"></span>
+          
+          <div className="my-auto py-12">
+            <h1 style={{ fontSize: '40px', lineHeight: 1.1, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', marginBottom: '24px' }}>Run your business from one operational layer.</h1>
+            <p style={{ fontSize: '18px', color: '#667085', fontWeight: 500, marginBottom: '48px', maxWidth: '400px' }}>Connect conversations, orders, inventory and automation through one AWS-powered control center.</p>
+            <div className="space-y-8">
+              <div className="flex gap-4">
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F8A9A', width: '24px', flexShrink: 0, paddingTop: '2px' }}>01</div>
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Conversations</h3>
+                  <p style={{ fontSize: '14px', color: '#667085', fontWeight: 500, margin: 0 }}>Customer communication through WhatsApp</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F8A9A', width: '24px', flexShrink: 0, paddingTop: '2px' }}>02</div>
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Orders</h3>
+                  <p style={{ fontSize: '14px', color: '#667085', fontWeight: 500, margin: 0 }}>Control the fulfillment lifecycle</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F8A9A', width: '24px', flexShrink: 0, paddingTop: '2px' }}>03</div>
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Inventory</h3>
+                  <p style={{ fontSize: '14px', color: '#667085', fontWeight: 500, margin: 0 }}>Track stock in real time</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F8A9A', width: '24px', flexShrink: 0, paddingTop: '2px' }}>04</div>
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Automation</h3>
+                  <p style={{ fontSize: '14px', color: '#667085', fontWeight: 500, margin: 0 }}>Respond to operational events automatically</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '10px', fontWeight: 700, color: '#667085', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span>AWS-NATIVE</span><span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#D8DEE7' }}></span>
+            <span>EVENT-DRIVEN</span><span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#D8DEE7' }}></span>
             <span>WHATSAPP-FIRST</span>
           </div>
+
         </div>
       </div>
+
       {/* Right Panel */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 relative overflow-y-auto">
-        <div className="lg:hidden flex items-center gap-3 mb-10 self-start max-w-[440px] mx-auto w-full">
-          <img src="/wbos-logo.png" alt="WBOS" className="w-7 h-7 object-contain" />
+      <div className="flex items-center justify-center p-6 md:p-12 box-border" style={{ backgroundColor: '#F6F7F9' }}>
+        
+        {/* Mobile Header (Hidden on Desktop) */}
+        <div className="lg:hidden absolute top-8 left-8 flex items-center gap-3">
+          <img src="/wbos-logo.png" alt="WBOS" className="object-contain" style={{ width: '24px', height: '24px' }} />
           <div className="leading-none mt-1">
-            <div className="font-extrabold text-lg tracking-tight text-[#111827]">WBOS</div>
-            <div className="text-[8px] font-bold uppercase tracking-widest text-[#667085] mt-0.5">Business Operations</div>
+            <div style={{ fontWeight: 800, fontSize: '16px', letterSpacing: '-0.02em', color: '#111827' }}>WBOS</div>
           </div>
         </div>
-        <div className="w-full max-w-[480px] wbos-auth-form-card wbos-auth-shell">
-          <Authenticator hideSignUp components={components} formFields={formFields} />
+
+        <div className="wbos-auth-form-card wbos-auth-shell">
+          <div className="auth-content">
+            <Authenticator hideSignUp components={components} formFields={formFields} />
+          </div>
         </div>
       </div>
+
     </div>
   );
 }
