@@ -8,13 +8,13 @@ The First Commit release focuses on building the **AWS event-driven operational 
 
 ---
 
-## 🚀 Live Demo
+## Live Demo
 
 **Deployed Application:** [Open WBOS Dashboard](https://main.d3ezkpn1mvdx2a.amplifyapp.com)
 
 > **Demo login required:** Use the credentials in the [Demo Access](#-demo-access) section to sign in.
 
-## 🔐 Demo Access
+## Demo Access
 
 The deployed WBOS dashboard requires authentication through **Amazon Cognito**.
 
