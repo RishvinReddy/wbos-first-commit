@@ -8,6 +8,50 @@ The First Commit release focuses on building the **AWS event-driven operational 
 
 ---
 
+## 🚀 Live Demo
+
+**Deployed Application:** [Open WBOS Dashboard](https://main.d3ezkpn1mvdx2a.amplifyapp.com)
+
+> **Demo login required:** Use the credentials in the [Demo Access](#-demo-access) section to sign in.
+
+## 🔐 Demo Access
+
+The deployed WBOS dashboard requires authentication through **Amazon Cognito**.
+
+For hackathon judges and reviewers, use the following demo account:
+
+| Field | Value |
+|---|---|
+| **Username** | `wbos-hackathon-test@eikomotsu.com` |
+| **Password** | `Wbos!2026Hack` |
+
+### How to access the demo
+
+1. Open the **Deployed Application** link above.
+2. The WBOS login screen will appear.
+3. Enter the demo credentials provided above.
+4. Click **Sign In**.
+5. If prompted for **MFA**, complete the configured authentication challenge.
+6. After authentication, you will be redirected to the WBOS dashboard.
+
+> **Note:** This account is provided specifically for hackathon evaluation and demonstration purposes. Please do not modify account settings, credentials, or application configuration.
+
+### Demo Flow
+
+After signing in, reviewers can explore:
+
+- **Overview** — operational dashboard
+- **Conversations** — WhatsApp customer interactions
+- **Orders** — order management and lifecycle
+- **Inventory** — live product inventory
+- **Automations** — event-driven business automation
+- **Analytics** — operational insights
+- **System** — AWS-backed system information
+
+For the recommended end-to-end demonstration, start with a **WhatsApp customer interaction**, then observe the resulting order/business operation in the WBOS dashboard.
+
+---
+
 ## 1. Overview
 
 **WBOS (WhatsApp Business Operating System)** is a WhatsApp-first business operations platform designed for businesses that already communicate with customers through WhatsApp.
