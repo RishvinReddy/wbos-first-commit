@@ -71,7 +71,8 @@ def check_inventory(tenant_id: str, product_ids: list[str]):
             "productId": item.get("productId"),
             "name": item.get("name"),
             "stock": int(item.get("stock", 0)),
-            "price": float(item.get("price", 0))
+            "price": float(item.get("price", 0)),
+            "unit": item.get("unit", "")
         }
         for item in items
     ]

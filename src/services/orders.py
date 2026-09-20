@@ -33,6 +33,12 @@ def create_order(tenant_id: str, customer_id: str, customer_phone: str, items: l
             raise ValueError(f"Product {pid} not found in inventory.")
 
         prod = inventory_map[pid]
+        
+        # Unit validation
+        requested_unit = item.get("unit")
+        if requested_unit and requested_unit.lower().rstrip('s') != prod["unit"].lower().rstrip('s'):
+            raise ValueError(f"{prod['name']} is sold by {prod['unit']}. Please specify the quantity in {prod['unit']}.")
+            
         price = Decimal(str(prod["price"]))
 
         line_total = price * qty
@@ -96,7 +102,7 @@ def create_order(tenant_id: str, customer_id: str, customer_phone: str, items: l
         "SK": {"S": "META"},
         "GSI1PK": {"S": f"TENANT#{tenant_id}#CUS#{customer_id}"},
         "GSI1SK": {"S": f"ORDER#{now}#{order_id}"},
-        "GSI2PK": {"S": f"TENANT#{tenant_id}#STATUS#PENDING"},
+        "GSI2PK": {"S": f"TENANT#{tenant_id}#STATUS#NEW"},
         "GSI2SK": {"S": f"CREATED#{now}"},
         "GSI3PK": {"S": f"TENANT#{tenant_id}#DATE#{now[:10]}"},
         "GSI3SK": {"S": f"ORDER#{order_id}"},
@@ -106,7 +112,7 @@ def create_order(tenant_id: str, customer_id: str, customer_phone: str, items: l
         "customerId": {"S": customer_id},
         "customerPhone": {"S": customer_phone},
         "deliveryAddress": {"S": delivery_address},
-        "status": {"S": "PENDING"},
+        "status": {"S": "NEW"},
         "itemCount": {"N": str(len(items))},
         "subtotal": {"N": str(subtotal)},
         "tax": {"N": str(tax_total)},
@@ -144,7 +150,7 @@ def create_order(tenant_id: str, customer_id: str, customer_phone: str, items: l
 
     return {
         "orderId": order_id,
-        "status": "PENDING",
+        "status": "NEW",
         "subtotal": float(subtotal),
         "tax": float(tax_total),
         "total": float(total),
@@ -285,3 +291,118 @@ def transition_order_state(tenant_id: str, order_id: str, payload: dict, actor: 
         "status": new_state,
         "transition": transition
     }
+
+def cancel_customer_order(tenant_id: str, customer_id: str, order_id: str):
+    """
+    Atomically cancels an order and restores inventory using DynamoDB Transactions.
+    Ensures that the order is only cancellable if it's in NEW or CONFIRMED state.
+    """
+    client = get_client()
+    table = get_client() # using client directly
+    from core.db import get_table
+    resource_table = get_table()
+    
+    # 1. Fetch Order Items to restore stock
+    response = resource_table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :sk_prefix)",
+        ExpressionAttributeValues={
+            ":pk": f"TENANT#{tenant_id}#ORDER#{order_id}",
+            ":sk_prefix": "ITEM#"
+        }
+    )
+    items = response.get("Items", [])
+    if not items:
+        raise ValueError("Order not found or has no items.")
+        
+    now = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
+    transact_items = []
+    
+    # 2. Add inventory restoration updates
+    for item in items:
+        pid = item["productId"]
+        qty = item["quantity"]
+        transact_items.append({
+            "Update": {
+                "TableName": config.DYNAMODB_TABLE,
+                "Key": {
+                    "PK": {"S": f"TENANT#{tenant_id}#PRODUCT#{pid}"},
+                    "SK": {"S": "METADATA"}
+                },
+                "UpdateExpression": "SET stock = stock + :qty",
+                "ExpressionAttributeValues": {
+                    ":qty": {"N": str(qty)}
+                }
+            }
+        })
+        
+    # 3. Update Order Header Status to CANCELLED conditionally
+    new_gsi2pk = f"TENANT#{tenant_id}#STATUS#CANCELLED"
+    transact_items.append({
+        "Update": {
+            "TableName": config.DYNAMODB_TABLE,
+            "Key": {
+                "PK": {"S": f"TENANT#{tenant_id}#ORDER#{order_id}"},
+                "SK": {"S": "META"}
+            },
+            "UpdateExpression": "SET #st = :new_status, GSI2PK = :new_gsi2pk",
+            "ConditionExpression": "#st IN (:st1, :st2) AND customerId = :cid",
+            "ExpressionAttributeNames": {"#st": "status"},
+            "ExpressionAttributeValues": {
+                ":new_status": {"S": "CANCELLED"},
+                ":new_gsi2pk": {"S": new_gsi2pk},
+                ":st1": {"S": "NEW"},
+                ":st2": {"S": "CONFIRMED"},
+                ":cid": {"S": customer_id}
+            }
+        }
+    })
+    
+    # 4. Audit Record
+    audit_id = str(uuid.uuid4())
+    transact_items.append({
+        "Put": {
+            "TableName": config.DYNAMODB_TABLE,
+            "Item": {
+                "PK": {"S": f"TENANT#{tenant_id}#ORDER#{order_id}"},
+                "SK": {"S": f"AUDIT#{now}#{audit_id}"},
+                "entityType": {"S": "ORDER_AUDIT"},
+                "transition": {"S": "CANCEL"},
+                "newState": {"S": "CANCELLED"},
+                "actor": {"S": customer_id},
+                "timestamp": {"S": now}
+            }
+        }
+    })
+    
+    client.transact_write_items(TransactItems=transact_items)
+    
+    # 5. Emit Event
+    events.publish(
+        event_type="OrderCancelled",
+        tenant_id=tenant_id,
+        source="wbos.orders",
+        data={
+            "orderId": order_id,
+            "newState": "CANCELLED",
+            "actor": customer_id
+        }
+    )
+    
+    return {"orderId": order_id, "status": "CANCELLED"}
+
+def get_customer_orders(tenant_id: str, customer_id: str, limit: int = 5):
+    """
+    Fetches the most recent orders for a customer using GSI1.
+    """
+    from core.db import get_table
+    from boto3.dynamodb.conditions import Key
+    table = get_table()
+    
+    response = table.query(
+        IndexName="GSI1",
+        KeyConditionExpression=Key("GSI1PK").eq(f"TENANT#{tenant_id}#CUS#{customer_id}") & Key("GSI1SK").begins_with("ORDER#"),
+        ScanIndexForward=False, # Most recent first
+        Limit=limit
+    )
+    return response.get("Items", [])
+

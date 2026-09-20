@@ -35,10 +35,7 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-const DEMO_CUSTOMERS: Record<string, string> = {
-  "+919876543210": "Rahul Sharma",
-  "OWNER_USER": "Owner (Test)"
-};
+
 
 function formatTime(dateStr: string) {
   if (!dateStr) return "--:--";
@@ -49,7 +46,7 @@ function formatTime(dateStr: string) {
 }
 
 export default function OrdersPage() {
-  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[], delivered: [] as any[] });
+  const [pipeline, setPipeline] = useState({ new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[], delivered: [] as any[], cancelled: [] as any[] });
   const [allOrders, setAllOrders] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,12 +69,12 @@ export default function OrdersPage() {
     setLoading(true);
     fetchOrders().then((data) => {
       setAllOrders(data);
-      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[], delivered: [] as any[] };
+      const newPipeline = { new: [] as any[], confirmed: [] as any[], preparing: [] as any[], ready: [] as any[], delivery: [] as any[], delivered: [] as any[], cancelled: [] as any[] };
       data.forEach((order: any) => {
         const status = (order.status || "PENDING").toUpperCase();
         const obj = {
           id: order.orderId,
-          customer: DEMO_CUSTOMERS[order.customer] || order.customer,
+          customer: order.customer,
           time: formatTime(order.createdAt),
           items: order.itemCount,
           total: order.total,
@@ -90,6 +87,7 @@ export default function OrdersPage() {
         else if (status === "READY") newPipeline.ready.push(obj);
         else if (status === "DELIVERY") newPipeline.delivery.push(obj);
         else if (status === "DELIVERED") newPipeline.delivered.push(obj);
+        else if (status === "CANCELLED") newPipeline.cancelled.push(obj);
         else newPipeline.new.push(obj);
       });
       setPipeline(newPipeline);
@@ -102,6 +100,8 @@ export default function OrdersPage() {
 
   useEffect(() => {
     loadOrders();
+    const interval = setInterval(loadOrders, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const columns = [
@@ -111,6 +111,7 @@ export default function OrdersPage() {
     { key: "ready", label: "Ready", count: pipeline.ready.length, color: 'var(--success)', bg: 'var(--success-soft)', orders: pipeline.ready, status: "READY" },
     { key: "delivery", label: "Delivery", count: pipeline.delivery.length, color: 'var(--event)', bg: 'var(--event-soft)', orders: pipeline.delivery, status: "DELIVERY" },
     { key: "delivered", label: "Delivered", count: pipeline.delivered.length, color: 'var(--success)', bg: 'var(--success-soft)', orders: pipeline.delivered, status: "DELIVERED" },
+    { key: "cancelled", label: "Cancelled", count: pipeline.cancelled.length, color: 'var(--danger)', bg: 'var(--danger-soft)', orders: pipeline.cancelled, status: "CANCELLED" },
   ];
 
   const dragTransitions: Record<string, { transition: "CONFIRM" | "START_PREPARATION" | "COMPLETE_PREPARATION" | "DISPATCH" | "DELIVER"; role?: "PACKER" | "DELIVERY_DRIVER" }> = {

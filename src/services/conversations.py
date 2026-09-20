@@ -1,6 +1,7 @@
 import datetime
 import uuid
 import logging
+import json
 from boto3.dynamodb.conditions import Key
 from core.db import get_table
 
@@ -206,3 +207,77 @@ def update_message_status_by_meta_id(tenant_id: str, customer_phone: str, meta_m
         ExpressionAttributeValues=expr_vals
     )
     logger.info(f"Updated status of {meta_message_id} to {new_status}")
+
+def set_conversation_state(tenant_id: str, customer_phone: str, context: dict):
+    """
+    Stores conversational workflow context onto the summary record with a TTL.
+    Context is serialized to JSON.
+    """
+    table = get_table()
+    now = datetime.datetime.now(datetime.UTC)
+    expires_at = int((now + datetime.timedelta(hours=2)).timestamp())
+    
+    update_expr = "SET pendingState = :ps, stateUpdatedAt = :ts, stateExpiresAt = :exp"
+    expr_vals = {
+        ":ps": json.dumps(context),
+        ":ts": now.isoformat() + "Z",
+        ":exp": expires_at
+    }
+    
+    try:
+        table.update_item(
+            Key={
+                "PK": f"TENANT#{tenant_id}",
+                "SK": f"CONVERSATION#{customer_phone}"
+            },
+            UpdateExpression=update_expr,
+            ExpressionAttributeValues=expr_vals
+        )
+    except Exception as e:
+        logger.error(f"Failed to set conversation state for {customer_phone}: {e}")
+
+def get_conversation_state(tenant_id: str, customer_phone: str) -> dict:
+    """
+    Retrieves and parses the pending conversation context.
+    Returns empty dict if no active state or if expired.
+    """
+    table = get_table()
+    try:
+        response = table.get_item(
+            Key={
+                "PK": f"TENANT#{tenant_id}",
+                "SK": f"CONVERSATION#{customer_phone}"
+            }
+        )
+        item = response.get("Item")
+        if not item or "pendingState" not in item:
+            return {}
+            
+        expires_at = item.get("stateExpiresAt", 0)
+        if expires_at and expires_at < int(datetime.datetime.now(datetime.UTC).timestamp()):
+            # Expired
+            return {}
+            
+        state_json = item.get("pendingState")
+        return json.loads(state_json) if state_json else {}
+        
+    except Exception as e:
+        logger.error(f"Failed to get conversation state for {customer_phone}: {e}")
+        return {}
+
+def clear_conversation_state(tenant_id: str, customer_phone: str):
+    """
+    Removes the pending workflow context from the conversation record.
+    """
+    table = get_table()
+    try:
+        table.update_item(
+            Key={
+                "PK": f"TENANT#{tenant_id}",
+                "SK": f"CONVERSATION#{customer_phone}"
+            },
+            UpdateExpression="REMOVE pendingState, stateUpdatedAt, stateExpiresAt"
+        )
+    except Exception as e:
+        logger.error(f"Failed to clear conversation state for {customer_phone}: {e}")
+

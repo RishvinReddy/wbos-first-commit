@@ -27,12 +27,12 @@ class TestIntentClassifier(unittest.TestCase):
     def test_inventory_check(self):
         res = self.classifier.classify("do you have rice?")
         self.assertEqual(res.intent, Intent.INVENTORY_CHECK)
-        self.assertEqual(res.entities.get("product"), "rice")
+        self.assertEqual(res.entities.get("productQuery"), "rice")
 
     def test_product_lookup(self):
         res = self.classifier.classify("How much is rice?")
         self.assertEqual(res.intent, Intent.PRODUCT_LOOKUP)
-        self.assertEqual(res.entities.get("product"), "rice")
+        self.assertEqual(res.entities.get("productQuery"), "rice")
 
     def test_catalog(self):
         for text in ["What do you have?", "Give me all items", "Show me all products", "catalog", "view catalog"]:
@@ -40,7 +40,7 @@ class TestIntentClassifier(unittest.TestCase):
             self.assertEqual(res.intent, Intent.CATALOG, f"Failed on '{text}'")
 
     def test_menu_selection(self):
-        for num in ["1", "2", "6", "7", "8", "21", "23"]:
+        for num in ["1", "2", "6", "7", "8", "21", "22"]:
             res = self.classifier.classify(num)
             self.assertEqual(res.intent, Intent.MENU_SELECTION)
             self.assertEqual(res.entities.get("option"), num)
@@ -53,24 +53,28 @@ class TestIntentClassifier(unittest.TestCase):
         # product first
         res = self.classifier.classify("Maggie noodles 2 packets")
         self.assertEqual(res.intent, Intent.CREATE_ORDER)
-        self.assertEqual(res.entities.get("product"), "Maggie noodles")
+        self.assertEqual(res.entities.get("productQuery"), "Maggie noodles")
         self.assertEqual(res.entities.get("quantity"), "2")
+        self.assertEqual(res.entities.get("unit"), "packet")
 
         # quantity first
         res = self.classifier.classify("2 packets of Maggie noodles")
         self.assertEqual(res.intent, Intent.CREATE_ORDER)
-        self.assertEqual(res.entities.get("product"), "Maggie noodles")
+        self.assertEqual(res.entities.get("productQuery"), "Maggie noodles")
         self.assertEqual(res.entities.get("quantity"), "2")
+        self.assertEqual(res.entities.get("unit"), "packet")
 
-        res = self.classifier.classify("I want 2 packets of Maggie noodles")
+        res = self.classifier.classify("I want 2 kg basmati rice")
         self.assertEqual(res.intent, Intent.CREATE_ORDER)
-        self.assertEqual(res.entities.get("product"), "Maggie noodles")
+        self.assertEqual(res.entities.get("productQuery"), "basmati rice")
         self.assertEqual(res.entities.get("quantity"), "2")
+        self.assertEqual(res.entities.get("unit"), "kg")
         
         res = self.classifier.classify("Buy 2 Maggie noodles")
         self.assertEqual(res.intent, Intent.CREATE_ORDER)
-        self.assertEqual(res.entities.get("product"), "Maggie noodles")
+        self.assertEqual(res.entities.get("productQuery"), "Maggie noodles")
         self.assertEqual(res.entities.get("quantity"), "2")
+        self.assertIsNone(res.entities.get("unit"))
 
     def test_cancel_order(self):
         res = self.classifier.classify("cancel order WB1024")
@@ -81,9 +85,9 @@ class TestIntentClassifier(unittest.TestCase):
         res = self.classifier.classify("send my invoice")
         self.assertEqual(res.intent, Intent.INVOICE_REQUEST)
 
-    def test_store_hours(self):
-        res = self.classifier.classify("what time do you open?")
-        self.assertEqual(res.intent, Intent.STORE_HOURS)
+    def test_support(self):
+        res = self.classifier.classify("contact support")
+        self.assertEqual(res.intent, Intent.SUPPORT_TICKET)
 
     def test_help(self):
         res = self.classifier.classify("help")

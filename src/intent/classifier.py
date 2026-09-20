@@ -23,8 +23,8 @@ class IntentClassifier:
                 if group_names:
                     for i, name in enumerate(group_names):
                         try:
-                            # Group 0 is full match, Group 1 is usually the trigger prefix
-                            val = match.group(i + 2) 
+                            # Group 0 is full match, Group i+1 corresponds to the sequentially defined capturing groups in regex.
+                            val = match.group(i + 1) 
                             if val:
                                 entities[name] = val.strip('?.!')
                         except IndexError:

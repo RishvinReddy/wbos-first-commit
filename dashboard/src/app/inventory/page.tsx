@@ -22,7 +22,7 @@ export default function InventoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadInventory = () => {
     fetchInventory().then((data) => {
       setInventory(data.map((item: any) => ({
         id: item.productId,
@@ -37,6 +37,12 @@ export default function InventoryPage() {
       setError(err.message || "Failed to fetch inventory");
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    loadInventory();
+    const interval = setInterval(loadInventory, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const totalSkus = inventory.length;

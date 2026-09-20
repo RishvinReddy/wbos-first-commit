@@ -41,10 +41,7 @@ function StatusBadge({ color, label }: { color: string; label: string }) {
   );
 }
 
-const DEMO_CUSTOMERS: Record<string, string> = {
-  "+919876543210": "Rahul Sharma",
-  "OWNER_USER": "Owner (Test)"
-};
+
 
 function formatTime(dateStr: string) {
   if (!dateStr) return "--:--";
@@ -264,7 +261,7 @@ export default function ExecutiveCockpit() {
                       <div className="flex gap-8 text-xs">
                         <div>
                           <div className="font-medium mb-0.5" style={{ color: 'var(--wbos-muted)' }}>Customer</div>
-                          <div className="font-semibold" style={{ color: 'var(--wbos-ink)' }}>{DEMO_CUSTOMERS[order.customer] || order.customer}</div>
+                          <div className="font-semibold" style={{ color: 'var(--wbos-ink)' }}>{order.customer}</div>
                         </div>
                         <div>
                           <div className="font-medium mb-0.5" style={{ color: 'var(--wbos-muted)' }}>Items</div>

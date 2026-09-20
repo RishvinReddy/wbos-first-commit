@@ -55,8 +55,10 @@ def lambda_handler(event, context):
             preparing = get_pending_orders(tenant_id, "PREPARING")
             ready = get_pending_orders(tenant_id, "READY")
             delivery = get_pending_orders(tenant_id, "DELIVERY")
+            delivered = get_pending_orders(tenant_id, "DELIVERED")
+            cancelled = get_pending_orders(tenant_id, "CANCELLED")
 
-            data = new_orders + confirmed + preparing + ready + delivery
+            data = new_orders + confirmed + preparing + ready + delivery + delivered + cancelled
             # Sort by created time descending
             data.sort(key=lambda x: x["createdAt"], reverse=True)
             return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(data)}
