@@ -1329,24 +1329,27 @@ The repository history is maintained as part of the project development record.
 
 # 23. AI-Assisted Development
 
-AI-assisted development tools were used during the engineering process for:
+AI tools were used during the development of WBOS as supporting tools rather than as a replacement for the development process. The majority of the system was designed, implemented, tested, and refined through manual engineering work.
 
-* architecture exploration
-* implementation assistance
-* debugging
-* code review
-* documentation
-* test planning
-* troubleshooting
-* development workflow acceleration
+AI assistance was used selectively for tasks such as:
 
-The primary development workflow included **Antigravity IDE** and conversational AI assistance.
+- exploring possible implementation approaches
+- understanding unfamiliar technical concepts
+- troubleshooting specific errors
+- reviewing parts of the code
+- improving documentation
+- suggesting test cases or edge cases
+- assisting with debugging when required
 
-AI assistance was used as an engineering aid; the resulting implementation was reviewed, tested, deployed, and validated against the actual AWS environment.
+The primary development environment was **Visual Studio Code (VS Code)**. Code was written and modified manually, with the developer responsible for the overall architecture, implementation decisions, integration of AWS services, configuration, testing, and deployment.
 
-The current WBOS execution architecture itself should not be described as generative-AI-powered.
+AI-generated suggestions were not directly treated as final implementations. Where AI assistance was used, the suggested code or approach was reviewed, modified where necessary, and tested against the actual project requirements and AWS environment.
 
-### Important distinction
+The development process therefore remained primarily **developer-driven and manually implemented**, with AI serving as an additional productivity and problem-solving aid.
+
+### AI Assistance vs. Runtime Architecture
+
+It is important to distinguish between the use of AI during development and the technologies that power the deployed WBOS system.
 
 ```text
 AI-assisted development
@@ -1354,7 +1357,9 @@ AI-assisted development
 AI-powered runtime
 ```
 
-The current runtime uses deterministic business logic and AWS event-driven services.
+The current WBOS runtime should **not** be described as a generative-AI-powered system. Its core execution is based on deterministic business logic, application code, database operations, and AWS event-driven services.
+
+AI assistance was primarily used during the **development lifecycle**, while the deployed application continues to execute according to its defined business rules and system architecture.
 
 ---
 
