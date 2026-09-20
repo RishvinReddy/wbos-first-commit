@@ -5,6 +5,7 @@ import { AlertTriangle, Clock, GripVertical, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { fetchOrders } from "@/lib/api";
 import OrderDetailDrawer from "@/components/OrderDetailDrawer";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -131,7 +132,11 @@ export default function OrdersPage() {
     try {
       setTransitioningOrderId(orderId);
       setTransitionError(null);
-      const token = localStorage.getItem("wbos_token");
+      const session = await fetchAuthSession();
+      const token = session.tokens?.accessToken?.toString();
+      if (!token) {
+        throw new Error("Your dashboard session has expired. Please sign in again.");
+      }
       const res = await fetch(`/api/orders/${orderId}/transition`, {
         method: "POST",
         headers: {
@@ -140,9 +145,19 @@ export default function OrdersPage() {
         },
         body: JSON.stringify({ transition, ...payload }),
       });
-      const data = await res.json();
+      
+      const raw = await res.text();
+      let data: any = {};
+      if (raw.trim()) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          throw new Error(`Order transition returned an invalid response (${res.status}).`);
+        }
+      }
+
       if (!res.ok) {
-        throw new Error(data.error || "Order transition failed");
+        throw new Error(data.error || `Order transition failed (${res.status})`);
       }
       await loadOrders();
     } catch (err: any) {
@@ -184,7 +199,11 @@ export default function OrdersPage() {
 
     if (transition.role) {
       try {
-        const token = localStorage.getItem("wbos_token");
+        const session = await fetchAuthSession();
+        const token = session.tokens?.accessToken?.toString();
+        if (!token) {
+          throw new Error("Your dashboard session has expired. Please sign in again.");
+        }
         const res = await fetch("/api/workers", {
           headers: { Authorization: `Bearer ${token}` },
         });

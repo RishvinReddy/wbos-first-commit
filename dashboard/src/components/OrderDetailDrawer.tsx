@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { formatDistanceToNow } from 'date-fns';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import { X, Clock, User, Package, CheckCircle, AlertTriangle, Play, Truck, ChevronRight } from "lucide-react";
 
 export default function OrderDetailDrawer({ 
@@ -24,8 +26,12 @@ export default function OrderDetailDrawer({
     const fetchDetails = async () => {
       try {
         setLoading(true);
+        const session = await fetchAuthSession();
+        const token = session.tokens?.accessToken?.toString();
+        if (!token) {
+          throw new Error("Your dashboard session has expired. Please sign in again.");
+        }
         // We fetch all orders and find ours (for MVP)
-        const token = localStorage.getItem("wbos_token");
         const res = await fetch("/api/orders", {
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -40,8 +46,9 @@ export default function OrderDetailDrawer({
         if (wRes.ok) {
            setWorkers(await wRes.json());
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
+        setError(e.message);
       } finally {
         setLoading(false);
       }
@@ -53,7 +60,11 @@ export default function OrderDetailDrawer({
     try {
       setTransitioning(true);
       setError(null);
-      const token = localStorage.getItem("wbos_token");
+      const session = await fetchAuthSession();
+      const token = session.tokens?.accessToken?.toString();
+      if (!token) {
+        throw new Error("Your dashboard session has expired. Please sign in again.");
+      }
       const res = await fetch(`/api/orders/${orderId}/transition`, {
         method: "POST",
         headers: {
@@ -63,7 +74,16 @@ export default function OrderDetailDrawer({
         body: JSON.stringify({ transition, ...payload })
       });
       
-      const data = await res.json();
+      const raw = await res.text();
+      let data: any = {};
+      if (raw.trim()) {
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          throw new Error(`Transition request returned an invalid response (${res.status}).`);
+        }
+      }
+      
       if (!res.ok) throw new Error(data.error || "Transition failed");
       
       setTransitionState(null);

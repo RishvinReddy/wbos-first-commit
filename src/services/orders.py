@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from decimal import Decimal
-from core.db import get_client, config
+from core.db import get_client, get_table, config
 from core import events
 from services.products import check_inventory
 
@@ -181,6 +181,21 @@ def transition_order_state(tenant_id: str, order_id: str, payload: dict, actor: 
     expected_old_state = rule["from"]
     new_state = rule["to"]
     
+    order_header = get_table().get_item(
+        Key={
+            "PK": f"TENANT#{tenant_id}#ORDER#{order_id}",
+            "SK": "META"
+        }
+    ).get("Item")
+
+    if not order_header:
+        raise ValueError(f"Order {order_id} not found")
+
+    customer_phone = order_header.get("customerPhone")
+
+    if not customer_phone:
+        raise ValueError(f"Order {order_id} has no customer phone")
+    
     # Payload validation
     worker_id = None
     driver_id = None
@@ -278,6 +293,7 @@ def transition_order_state(tenant_id: str, order_id: str, payload: dict, actor: 
         source="wbos.orders",
         data={
             "orderId": order_id,
+            "customerPhone": customer_phone,
             "previousState": expected_old_state if isinstance(expected_old_state, str) else "UNKNOWN",
             "newState": new_state,
             "actor": actor,
@@ -377,12 +393,25 @@ def cancel_customer_order(tenant_id: str, customer_id: str, order_id: str):
     client.transact_write_items(TransactItems=transact_items)
     
     # 5. Emit Event
+    order_header = resource_table.get_item(
+        Key={
+            "PK": f"TENANT#{tenant_id}#ORDER#{order_id}",
+            "SK": "META"
+        }
+    ).get("Item")
+
+    if not order_header:
+        raise ValueError(f"Order {order_id} not found")
+        
+    customer_phone = order_header.get("customerPhone")
+
     events.publish(
         event_type="OrderCancelled",
         tenant_id=tenant_id,
         source="wbos.orders",
         data={
             "orderId": order_id,
+            "customerPhone": customer_phone,
             "newState": "CANCELLED",
             "actor": customer_id
         }

@@ -259,7 +259,7 @@ Resources:
             RetryPolicy:
               MaximumRetryAttempts: 2
               MaximumEventAgeInSeconds: 3600
-        OrderCreatedNotifyEvent:
+        OrderStatusChangedEvent:
           Type: EventBridgeRule
           Properties:
             EventBusName: !Ref WBOSEventBus
@@ -268,6 +268,12 @@ Resources:
                 - wbos.orders
               detail-type:
                 - OrderCreated
+                - OrderConfirmed
+                - OrderPreparationStarted
+                - OrderPreparationCompleted
+                - OrderDispatched
+                - OrderDelivered
+                - OrderCancelled
             DeadLetterConfig:
               Arn: !GetAtt WBOSEventsDLQ.Arn
             RetryPolicy:

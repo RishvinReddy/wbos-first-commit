@@ -86,6 +86,32 @@ def persist_outbound_message(tenant_id: str, customer_phone: str, text: str, met
     # 2. Update conversation summary
     _update_conversation_record(tenant_id, customer_phone, text, timestamp, "OUTBOUND")
 
+def persist_outbound_failure(tenant_id: str, customer_phone: str, text: str, error_title: str, timestamp: str = None):
+    """
+    Persists an outbound message attempt that immediately failed at the API layer.
+    """
+    if not timestamp:
+        timestamp = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
+        
+    message_id = str(uuid.uuid4())
+    table = get_table()
+    
+    item = {
+        "PK": f"TENANT#{tenant_id}#CONVERSATION#{customer_phone}",
+        "SK": f"MESSAGE#{timestamp}#{message_id}",
+        "direction": "OUTBOUND",
+        "type": "text",
+        "text": text,
+        "timestamp": timestamp,
+        "status": "FAILED",
+        "metaErrorTitle": error_title
+    }
+        
+    table.put_item(Item=item)
+    
+    # Update conversation summary so the failed message shows up as latest
+    _update_conversation_record(tenant_id, customer_phone, text, timestamp, "OUTBOUND")
+
 def list_conversations(tenant_id: str):
     """
     Returns a list of conversation summaries for a tenant.
