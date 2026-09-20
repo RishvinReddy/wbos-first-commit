@@ -18,23 +18,36 @@ The First Commit release focuses on building the **AWS event-driven operational 
 
 The deployed WBOS dashboard requires authentication through **Amazon Cognito**.
 
-For hackathon judges and reviewers, use the following demo account:
+### Demo Credentials
 
 | Field | Value |
 |---|---|
 | **Username** | `wbos-hackathon-test@eikomotsu.com` |
 | **Password** | `Wbos!2026Hack` |
 
-### How to access the demo
+### MFA / OTP Assistance
 
-1. Open the **Deployed Application** link above.
-2. The WBOS login screen will appear.
-3. Enter the demo credentials provided above.
-4. Click **Sign In**.
-5. If prompted for **MFA**, complete the configured authentication challenge.
-6. After authentication, you will be redirected to the WBOS dashboard.
+The demo account may require an **MFA/OTP verification code** during sign-in.
 
-> **Note:** This account is provided specifically for hackathon evaluation and demonstration purposes. Please do not modify account settings, credentials, or application configuration.
+If an authentication code is requested, please contact one of the team members below:
+
+| Team Member | Mobile | Email |
+|---|---|---|
+| **Member 1 — Rishvin Reddy** | `+91 9848723235` | `rishvinreddy@gmail.com` |
+| **Member 2 — Navari Yashwanth Reddy** | `+91 6303236366` | `navariyashwanthreddy@gmail.com` |
+
+Please contact either team member to obtain the current verification code during the evaluation.
+
+> **Note:** MFA codes are time-sensitive and should be requested when signing in. Do not reuse an expired authentication code.
+
+### How to Access
+
+1. Open the **Deployed Application**.
+2. Enter the demo username and password above.
+3. Click **Sign In**.
+4. If Amazon Cognito requests an MFA/OTP code, contact either team member listed above.
+5. Enter the current verification code.
+6. You will then be redirected to the WBOS dashboard.
 
 ### Demo Flow
 
