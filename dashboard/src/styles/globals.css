@@ -127,3 +127,121 @@
     color: white;
   }
 }
+
+/* ─── WBOS AUTHENTICATION SHELL OVERRIDES ─── */
+
+.wbos-auth-shell [data-amplify-authenticator] {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  max-width: 100%;
+}
+
+.wbos-auth-shell .amplify-tabs {
+  display: none;
+}
+
+.wbos-auth-shell [data-amplify-router] {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.wbos-auth-shell .amplify-field-group__control {
+  flex-direction: column;
+}
+
+.wbos-auth-shell .amplify-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.wbos-auth-shell .amplify-input {
+  height: 52px;
+  border-radius: 8px;
+  border: 1px solid #D8DEE7;
+  background: #FFFFFF;
+  font-size: 15px;
+  color: #111827;
+  padding: 0 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.02);
+}
+
+.wbos-auth-shell .amplify-input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+  outline: none;
+}
+
+.wbos-auth-shell .amplify-input::placeholder {
+  color: #667085;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="primary"] {
+  height: 52px;
+  border-radius: 8px;
+  background: #0F8A9A;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  margin-top: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(15, 138, 154, 0.15);
+}
+
+.wbos-auth-shell .amplify-button[data-variation="primary"]:hover {
+  background: #08717F;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="primary"]:disabled {
+  background: #D8DEE7;
+  color: #667085;
+  box-shadow: none;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="link"] {
+  color: #667085;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 12px;
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.wbos-auth-shell .amplify-button[data-variation="link"]:hover {
+  color: #111827;
+  background: transparent;
+}
+
+.wbos-auth-shell .amplify-heading {
+  display: none;
+}
+
+.wbos-auth-shell .amplify-field-group__append .amplify-button {
+  background: transparent;
+  border: none;
+  color: #667085;
+  margin-top: 0;
+  height: auto;
+}
+
+.wbos-auth-shell .amplify-alert {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.wbos-auth-shell * {
+  font-family: inherit;
+}
+
