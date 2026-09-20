@@ -39,7 +39,7 @@ def lambda_handler(event, context):
         body = json.loads(event.get("body", "{}"))
         
         # Transition Order State
-        result = transition_order_state(tenant_id, order_id, body, exec_context.user_id)
+        result = transition_order_state(tenant_id, order_id, body, exec_context.actor_id)
         
         return {"statusCode": 200, "headers": _cors_headers(), "body": json.dumps(result)}
 

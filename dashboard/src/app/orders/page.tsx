@@ -3,7 +3,7 @@
 import { useState, useEffect, type DragEvent } from "react";
 import { AlertTriangle, Clock, GripVertical, Loader2, X } from "lucide-react";
 import Link from "next/link";
-import { fetchOrders } from "@/lib/api";
+import { API_URL, fetchOrders } from "@/lib/api";
 import OrderDetailDrawer from "@/components/OrderDetailDrawer";
 import { fetchAuthSession } from "aws-amplify/auth";
 
@@ -137,7 +137,7 @@ export default function OrdersPage() {
       if (!token) {
         throw new Error("Your dashboard session has expired. Please sign in again.");
       }
-      const res = await fetch(`/api/orders/${orderId}/transition`, {
+      const res = await fetch(`${API_URL}/orders/${orderId}/transition`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -204,7 +204,7 @@ export default function OrdersPage() {
         if (!token) {
           throw new Error("Your dashboard session has expired. Please sign in again.");
         }
-        const res = await fetch("/api/workers", {
+        const res = await fetch(`${API_URL}/workers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) {

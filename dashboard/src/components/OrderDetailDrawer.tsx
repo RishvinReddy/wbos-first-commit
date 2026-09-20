@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { X, Clock, User, Package, CheckCircle, AlertTriangle, Play, Truck, ChevronRight } from "lucide-react";
+import { API_URL } from "@/lib/api";
 
 export default function OrderDetailDrawer({ 
   orderId, 
@@ -32,7 +33,7 @@ export default function OrderDetailDrawer({
           throw new Error("Your dashboard session has expired. Please sign in again.");
         }
         // We fetch all orders and find ours (for MVP)
-        const res = await fetch("/api/orders", {
+        const res = await fetch(`${API_URL}/orders`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const orders = await res.json();
@@ -40,7 +41,7 @@ export default function OrderDetailDrawer({
         setOrder(found);
 
         // Fetch workers
-        const wRes = await fetch("/api/workers", {
+        const wRes = await fetch(`${API_URL}/workers`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (wRes.ok) {
@@ -65,7 +66,7 @@ export default function OrderDetailDrawer({
       if (!token) {
         throw new Error("Your dashboard session has expired. Please sign in again.");
       }
-      const res = await fetch(`/api/orders/${orderId}/transition`, {
+      const res = await fetch(`${API_URL}/orders/${orderId}/transition`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
